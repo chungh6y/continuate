@@ -20,3 +20,8 @@ continuate Package
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. automodule:: continuate.single_parameter
+    :members:
+    :undoc-members:
+    :show-inheritance:
