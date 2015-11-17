@@ -29,7 +29,7 @@ def Jacobian(func, x0, alpha=1e-7, fx=None):
     Examples
     --------
     >>> import numpy as np
-    >>> f = lambda x: np.array([x[1]^2, x[0]^2])
+    >>> f = lambda x: np.array([x[1]**2, x[0]**2])
     >>> x0 = np.array([1, 2])
     >>> J = Jacobian(f, x0)
 
