@@ -34,7 +34,7 @@ def tangent_vector(func, x, mu, alpha=1e-7, dmu=None):
         dmu = alpha
     dfdmu = (func(x, mu + dmu) - func(x, mu)) / dmu
     J = Jacobian(lambda y: func(y, mu), x, alpha=alpha)
-    dx = sp.linalg.gmres(J, -dfdmu)
+    dx, _ = sp.linalg.gmres(J, -dfdmu)
     inv_norm = 1.0 / np.sqrt(np.dot(dx, dx) + 1)
     return inv_norm * dx, inv_norm
 
