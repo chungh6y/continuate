@@ -9,3 +9,7 @@ Contains
 --------
 
 - single parameter continuation
+
+License
+-------
+This software is released under the MIT License, see LICENSE file.
