@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .linalg import Jacobian
+from .linalg.newton import Jacobi
 
 import numpy as np
 import scipy.optimize as opt
@@ -24,7 +24,7 @@ def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
     mu: float
         the paramter where the tangent space is calculated
     alpha: float
-        alpha for Jacobian
+        alpha for Jacobi
     alpha_mu: float, optional
         if None, alpha is used.
 
@@ -37,7 +37,7 @@ def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
     if alpha_mu is None:
         alpha_mu = alpha
     dfdmu = (func(x, mu + alpha_mu) - func(x, mu)) / alpha_mu
-    J = Jacobian(lambda y: func(y, mu), x, alpha=alpha)
+    J = Jacobi(lambda y: func(y, mu), x, alpha=alpha)
     dx, _ = sp.linalg.gmres(J, -dfdmu)
     inv_norm = 1.0 / np.sqrt(np.dot(dx, dx) + 1)
     return inv_norm * dx, inv_norm
