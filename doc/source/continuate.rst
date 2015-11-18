@@ -11,3 +11,12 @@ continuate Package
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: continuate.linalg.krylov
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: continuate.linalg.newton
+    :members:
+    :undoc-members:
+    :show-inheritance:
