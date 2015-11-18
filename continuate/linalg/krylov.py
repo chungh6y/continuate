@@ -24,7 +24,7 @@ class Arnoldi(object):
             Residual threshold
 
         Returns
-        ------
+        --------
         (residual, unit vector)
 
         """
