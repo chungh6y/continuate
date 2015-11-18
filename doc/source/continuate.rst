@@ -6,6 +6,9 @@ continuate Package
     :undoc-members:
     :show-inheritance:
 
+continuate.linalg
+-------------------
+
 .. automodule:: continuate.linalg
     :members:
     :undoc-members:
@@ -20,6 +23,9 @@ continuate Package
     :members:
     :undoc-members:
     :show-inheritance:
+
+continuate.single_parameter
+----------------------------
 
 .. automodule:: continuate.single_parameter
     :members:

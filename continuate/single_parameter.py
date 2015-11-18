@@ -7,7 +7,7 @@ import scipy.optimize as opt
 import scipy.sparse as sp
 
 
-def tangent_vector(func, x, mu, alpha=1e-7, dmu=None):
+def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
     """
     Tangent vector at (x, mu)
 
@@ -30,9 +30,9 @@ def tangent_vector(func, x, mu, alpha=1e-7, dmu=None):
         normalized vector: :math:`dx^2 + dmu^2 = 1`
 
     """
-    if dmu is None:
-        dmu = alpha
-    dfdmu = (func(x, mu + dmu) - func(x, mu)) / dmu
+    if alpha_mu is None:
+        alpha_mu = alpha
+    dfdmu = (func(x, mu + alpha_mu) - func(x, mu)) / alpha_mu
     J = Jacobian(lambda y: func(y, mu), x, alpha=alpha)
     dx, _ = sp.linalg.gmres(J, -dfdmu)
     inv_norm = 1.0 / np.sqrt(np.dot(dx, dx) + 1)
