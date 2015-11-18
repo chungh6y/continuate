@@ -6,6 +6,10 @@ import numpy as np
 import scipy.optimize as opt
 import scipy.sparse as sp
 
+from logging import getLogger, DEBUG
+logger = getLogger(__name__)
+logger.setLevel(DEBUG)
+
 
 def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
     """
@@ -21,7 +25,7 @@ def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
         the paramter where the tangent space is calculated
     alpha: float
         alpha for Jacobian
-    dmu: float, optional
+    alpha_mu: float, optional
         if None, alpha is used.
 
     Returns
@@ -48,6 +52,7 @@ def continuate(func, x0, mu0, delta):
         mu = lambda x: mu0 + (delta - np.dot(x - x0, dx)) / dmu
         F = lambda x: func(x, mu(x))
         x = x0 + delta * dx
-        x0 = opt.newton_krylov(F, x)
+        x0 = opt.newton_krylov(F, x, f_tol=1e-7)
         mu0 = mu(x0)
+        logger.debug(np.linalg.norm(func(x0, mu0)))
         yield x0, mu0
