@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import numpy as np
@@ -11,6 +10,31 @@ logger.setLevel(DEBUG)
 
 
 def Jacobi(func, x0, alpha=1e-7, fx=None):
+    """
+    Jacobi oprator :math:`DF(x0)`, where
+
+    .. math::
+        DF(x0)dx = (F(x0 + \\alpha dx / |dx|) - F(x0))/(\\alpha/|dx|)
+
+    Parameters
+    ----------
+    func: numpy.array -> numpy.array
+        A function to be differentiated
+    x0: numpy.array
+        A position where the Jacobian is evaluated
+    alpha: float
+
+    fx: numpy.array, optional
+        func(x0)
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> f = lambda x: np.array([x[1]**2, x[0]**2])
+    >>> x0 = np.array([1, 2])
+    >>> J = Jacobian(f, x0)
+
+    """
     if fx is None:
         fx = func(x0)
 
