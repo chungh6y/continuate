@@ -19,6 +19,35 @@ def f2(v):
     return np.array([x * x + 1, y * y + 2])
 
 
+class TestJacobi(TestCase):
+
+    def test_linear(self):
+        """
+        Jacobi matrix of a linear function equals to the original.
+        """
+        shape = (10, 10)
+        A = np.random.random(shape)
+        f = lambda x: np.dot(A, x)
+        x0 = np.zeros(shape[0])
+        J = newton.Jacobi(f, x0)
+        for _ in range(10):
+            x = np.random.random(shape[0])
+            self.assertTrue(np.allclose(f(x), J(x)))
+
+    def test_polynominal(self):
+        """
+        Test simple nonlinear case
+        """
+        f = lambda x: np.array([x[1]**2, x[0]**2])
+        x0 = np.array([1, 2])
+        J1 = newton.Jacobi(f, x0)
+        A = np.array([[0, 2*2], [2*1, 0]])
+        J2 = lambda x: np.dot(A, x)
+        for _ in range(10):
+            x = np.random.random(2)
+            self.assertTrue(np.allclose(J1(x), J2(x)))
+
+
 class TestNewton(TestCase):
 
     def test_newton(self):
