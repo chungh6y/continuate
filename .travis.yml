@@ -13,8 +13,8 @@ cache:
 addons:
   apt:
     packages:
-      - libatlas3gf-base
-      - libatlas-dev
+      - libblas-dev
+      - liblapack-dev
       - python-scipy
 
 script: nosetests -v --with-doctest
