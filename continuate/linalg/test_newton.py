@@ -45,7 +45,7 @@ class TestJacobi(TestCase):
         J2 = lambda x: np.dot(A, x)
         for _ in range(10):
             x = np.random.random(2)
-            self.assertTrue(np.allclose(J1 * x, J2 * x))
+            self.assertTrue(np.allclose(J1 * x, J2(x)))
 
 
 class TestNewton(TestCase):
