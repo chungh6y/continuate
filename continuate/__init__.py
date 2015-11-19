@@ -1,3 +1,2 @@
 # -*- coding: utf-8 -*-
-
-all = ["linalg"]
+all = ["linalg", "single_parameter"]
