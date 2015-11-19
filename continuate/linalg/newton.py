@@ -49,7 +49,7 @@ def Jacobi(func, x0, alpha=1e-7, fx=None):
 def _inv(A, b):
     x, res = linalg.gmres(A, b)
     if res:
-        logger.warning("Iteration of GMRES does not convergent, res={:d}".format(res))
+        logger.info("Iteration of GMRES does not convergent, res={:d}".format(res))
         raise RuntimeError("Not convergent (GMRES)")
     return x
 
@@ -61,7 +61,7 @@ def newton(func, x0, ftol=1e-5, maxiter=100):
         logger.debug('count:{:d}\tresidual:{:e}'.format(t, res))
         if res <= ftol:
             return x0
-        A = Jacobi(func, x0, fx)
+        A = Jacobi(func, x0, fx=fx)
         dx = _inv(A, -fx)
         x0 = x0 + dx
     raise RuntimeError("Not convergent (Newton)")
