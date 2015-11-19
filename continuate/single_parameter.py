@@ -47,12 +47,19 @@ def continuate(func, x0, mu0, delta):
     """
     A generator for continuation
     """
+    pre_dx = None
     while True:
         dx, dmu = tangent_vector(func, x0, mu0)
+        # Keep continuation direction for overcoming turning points
+        if pre_dx is not None and np.dot(pre_dx, dx) < 0:
+            dx = -dx
+            dmu = -dmu
+        pre_dx = dx
         mu = lambda x: mu0 + (delta - np.dot(x - x0, dx)) / dmu
         F = lambda x: func(x, mu(x))
-        x = x0 + delta * dx
-        x0 = opt.newton_krylov(F, x, f_tol=1e-7)
-        mu0 = mu(x0)
-        logger.debug(np.linalg.norm(func(x0, mu0)))
+        pre = x0 + delta * dx
+        x1 = opt.newton_krylov(F, pre, f_tol=1e-7)
+        logger.debug(np.linalg.norm(F(x1)))
+        mu0 = mu(x1)
+        x0 = x1
         yield x0, mu0
