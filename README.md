@@ -5,6 +5,14 @@ continuate
 
 Continuation tools.
 
+Install
+-------
+Please install from PyPI
+
+```command
+pip install continuate
+```
+
 Contains
 --------
 
