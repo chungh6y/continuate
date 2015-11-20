@@ -1,7 +1,8 @@
 continuate
 ==========
 
-[![Build Status](https://travis-ci.org/termoshtt/continuate.svg?branch=master)](https://travis-ci.org/termoshtt/continuate)
+[![Build Status](https://travis-ci.org/termoshtt/continuate.svg?branch=master)](https://travis-ci.org/termoshtt/continuate) \
+[![PyPI version](https://badge.fury.io/py/continuate.svg)](https://badge.fury.io/py/continuate)
 
 Continuation tools.
 
