@@ -46,6 +46,34 @@ def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
 def continuate(func, x0, mu0, delta):
     """
     A generator for continuation
+
+    Parameters
+    -----------
+    func: (numpy.array, float) -> numpy.array
+        The function which will be continuated
+    x0: numpy.array
+        Initial point of continuation. It must satisfy `func(x0, mu0) = 0`
+    mu0: float
+        Initial parameter of continuation. It must satisfy `func(x0, mu0) = 0`
+    delta: float
+        step length of continuation
+
+    Returns
+    --------
+    Genrator yielding (numpy.array, float)
+
+    Examples
+    ---------
+    >>> import numpy as np
+    >>> from itertools import islice
+    >>> f = lambda x, mu: np.array([x[1]**2 - mu, x[0]])
+    >>> x0 = np.array([1.0, 0.0])
+    >>> mu0 = 1.0
+    >>> G = continuate(f, x0, mu0, 1)
+    >>> result = []
+    >>> for x, m in islice(G, 10):
+    ...     result.append((x, m))
+
     """
     pre_dx = None
     while True:
