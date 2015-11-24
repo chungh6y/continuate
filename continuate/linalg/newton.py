@@ -55,6 +55,28 @@ def _inv(A, b, tol=1e-6):
 
 
 def newton(func, x0, ftol=1e-5, maxiter=100, inner_tol=1e-6):
+    """
+    solve multi-dimensional equation `F(x) = 0` using Newton-Krylov method.
+
+    Parameters
+    -----------
+    func: numpy.array -> numpy.array
+        `F`
+    x0: numpy.array
+        initial guess of the solution
+    ftol: float, optional
+        tolerance of the iteration
+    maxiter: int, optional
+        maximum number of trial
+    inner_tol: float, optional
+        tolerance of linear solver (use scipy.sparse.linalg.gmres)
+
+    Returns
+    --------
+    numpy.array
+        The solution `x` satisfies `F(x)=0`
+
+    """
     for t in range(maxiter):
         fx = func(x0)
         res = np.linalg.norm(fx)
