@@ -14,10 +14,10 @@ Please install from PyPI
 pip install continuate
 ```
 
-Contains
---------
+Document
+---------
+See http://termoshtt.github.io/continuate
 
-- single parameter continuation
 
 License
 -------
