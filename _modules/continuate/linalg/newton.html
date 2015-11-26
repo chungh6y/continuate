@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="continuate 0.1 documentation" href="../../../index.html" />
-    <link rel="up" title="continuate.linalg" href="../linalg.html" /> 
+    <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -38,8 +38,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">continuate 0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../linalg.html" accesskey="U">continuate.linalg</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -60,7 +59,7 @@
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">DEBUG</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Jacobi"><a class="viewcode-back" href="../../../continuate.html#continuate.linalg.newton.Jacobi">[docs]</a><span class="k">def</span> <span class="nf">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Jacobi"><a class="viewcode-back" href="../../../linalg.html#continuate.linalg.newton.Jacobi">[docs]</a><span class="k">def</span> <span class="nf">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Jacobi oprator :math:`DF(x0)`, where</span>
 
@@ -105,7 +104,7 @@
     <span class="k">return</span> <span class="n">x</span>
 
 
-<div class="viewcode-block" id="newton"><a class="viewcode-back" href="../../../continuate.html#continuate.linalg.newton.newton">[docs]</a><span class="k">def</span> <span class="nf">newton</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+<div class="viewcode-block" id="newton"><a class="viewcode-back" href="../../../linalg.html#continuate.linalg.newton.newton">[docs]</a><span class="k">def</span> <span class="nf">newton</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    solve multi-dimensional equation `F(x) = 0` using Newton-Krylov method.</span>
 
@@ -140,7 +139,7 @@
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not convergent (Newton)&quot;</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="hook_step"><a class="viewcode-back" href="../../../continuate.html#continuate.linalg.newton.hook_step">[docs]</a><span class="k">def</span> <span class="nf">hook_step</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">e</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<div class="viewcode-block" id="hook_step"><a class="viewcode-back" href="../../../linalg.html#continuate.linalg.newton.hook_step">[docs]</a><span class="k">def</span> <span class="nf">hook_step</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">e</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    optimal hook step based on trusted region approach</span>
 
@@ -197,7 +196,7 @@
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not convergent (hook-step)&quot;</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="krylov_hook_step"><a class="viewcode-back" href="../../../continuate.html#continuate.linalg.newton.krylov_hook_step">[docs]</a><span class="k">def</span> <span class="nf">krylov_hook_step</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="krylov_hook_step"><a class="viewcode-back" href="../../../linalg.html#continuate.linalg.newton.krylov_hook_step">[docs]</a><span class="k">def</span> <span class="nf">krylov_hook_step</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    optimal hook step with Krylov subspace method</span>
 
@@ -221,7 +220,7 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">xi</span><span class="p">),</span> <span class="n">nu</span>
 
 </div>
-<div class="viewcode-block" id="newton_krylov_hook"><a class="viewcode-back" href="../../../continuate.html#continuate.linalg.newton.newton_krylov_hook">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov_hook</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<div class="viewcode-block" id="newton_krylov_hook"><a class="viewcode-back" href="../../../linalg.html#continuate.linalg.newton.newton_krylov_hook">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov_hook</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
     <span class="n">nu</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxiter</span><span class="p">):</span>
         <span class="n">fx</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
@@ -280,8 +279,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">continuate 0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../linalg.html" >continuate.linalg</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

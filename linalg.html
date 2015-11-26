@@ -1,0 +1,339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>continuate.linalg &mdash; continuate 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="continuate 0.1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">continuate 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-continuate.linalg">
+<span id="continuate-linalg"></span><h1>continuate.linalg<a class="headerlink" href="#module-continuate.linalg" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-continuate.linalg.krylov"></span><dl class="class">
+<dt id="continuate.linalg.krylov.Arnoldi">
+<em class="property">class </em><code class="descclassname">continuate.linalg.krylov.</code><code class="descname">Arnoldi</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/krylov.html#Arnoldi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.krylov.Arnoldi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#continuate.linalg.krylov.Arnoldi.get_basis" title="continuate.linalg.krylov.Arnoldi.get_basis"><code class="xref py py-obj docutils literal"><span class="pre">get_basis</span></code></a>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#continuate.linalg.krylov.Arnoldi.get_projected_matrix" title="continuate.linalg.krylov.Arnoldi.get_projected_matrix"><code class="xref py py-obj docutils literal"><span class="pre">get_projected_matrix</span></code></a>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#continuate.linalg.krylov.Arnoldi.iterate" title="continuate.linalg.krylov.Arnoldi.iterate"><code class="xref py py-obj docutils literal"><span class="pre">iterate</span></code></a>([e])</td>
+<td>iterate Arnoldi process</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="continuate.linalg.krylov.Arnoldi.get_basis">
+<code class="descname">get_basis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/krylov.html#Arnoldi.get_basis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.krylov.Arnoldi.get_basis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="continuate.linalg.krylov.Arnoldi.get_projected_matrix">
+<code class="descname">get_projected_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/krylov.html#Arnoldi.get_projected_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.krylov.Arnoldi.get_projected_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="continuate.linalg.krylov.Arnoldi.iterate">
+<code class="descname">iterate</code><span class="sig-paren">(</span><em>e=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/krylov.html#Arnoldi.iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.krylov.Arnoldi.iterate" title="Permalink to this definition">¶</a></dt>
+<dd><p>iterate Arnoldi process</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>e</strong> : float, optional (default=1e-10)</p>
+<blockquote>
+<div><p>Residual threshold</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(residual, unit vector)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="continuate.linalg.krylov.arnoldi">
+<code class="descclassname">continuate.linalg.krylov.</code><code class="descname">arnoldi</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>e=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/krylov.html#arnoldi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.krylov.arnoldi" title="Permalink to this definition">¶</a></dt>
+<dd><p>get Arnoldi projected matrix and its basis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>A</strong> : scipy.sparse.linalg.LinearOperator</p>
+<blockquote>
+<div><p>linear operator</p>
+</div></blockquote>
+<p><strong>b</strong> : array like</p>
+<blockquote>
+<div><p>basis of Krylov subspace</p>
+</div></blockquote>
+<p><strong>e</strong> : float, optional (default=1e-10)</p>
+<blockquote>
+<div><p>Residual threshold</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(H, V)</p>
+<blockquote class="last">
+<div><p>H is projected Hessemberg matrix,
+and V is basis (V[:,n] is each basis vector).</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="module-continuate.linalg.newton"></span><dl class="function">
+<dt id="continuate.linalg.newton.Jacobi">
+<code class="descclassname">continuate.linalg.newton.</code><code class="descname">Jacobi</code><span class="sig-paren">(</span><em>func</em>, <em>x0</em>, <em>alpha=1e-07</em>, <em>fx=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/newton.html#Jacobi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.newton.Jacobi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jacobi oprator <span class="math">\(DF(x0)\)</span>, where</p>
+<div class="math">
+\[DF(x0)dx = (F(x0 + \alpha dx / |dx|) - F(x0))/(\alpha/|dx|)\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>func: numpy.array -&gt; numpy.array</strong></p>
+<blockquote>
+<div><p>A function to be differentiated</p>
+</div></blockquote>
+<p><strong>x0: numpy.array</strong></p>
+<blockquote>
+<div><p>A position where the Jacobian is evaluated</p>
+</div></blockquote>
+<p><strong>alpha: float</strong></p>
+<p><strong>fx: numpy.array, optional</strong></p>
+<blockquote class="last">
+<div><p>func(x0)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">J</span> <span class="o">=</span> <span class="n">Jacobi</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="continuate.linalg.newton.hook_step">
+<code class="descclassname">continuate.linalg.newton.</code><code class="descname">hook_step</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>r</em>, <em>nu=0</em>, <em>maxiter=100</em>, <em>e=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/newton.html#hook_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.newton.hook_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>optimal hook step based on trusted region approach</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>A</strong> : numpy.array</p>
+<blockquote>
+<div><p>square matrix</p>
+</div></blockquote>
+<p><strong>b</strong> : numpy.array</p>
+<p><strong>r</strong> : float</p>
+<blockquote>
+<div><p>trusted region</p>
+</div></blockquote>
+<p><strong>nu</strong> : float, optional (default=0.0)</p>
+<blockquote>
+<div><p>initial value of Lagrange multiplier</p>
+</div></blockquote>
+<p><strong>e</strong> : float, optional (default=0.1)</p>
+<blockquote>
+<div><p>relative tolerance of residue form r</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(numpy.array, float)</p>
+<blockquote class="last">
+<div><p>argmin of xi, and nu (Lagrange multiplier)
+CAUTION: nu may be not accurate</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<ul class="simple">
+<li>Numerical Methods for Unconstrained Optimization and Nonlinear Equations
+J. E. Dennis, Jr. and Robert B. Schnabel
+<a class="reference external" href="http://dx.doi.org/10.1137/1.9781611971200">http://dx.doi.org/10.1137/1.9781611971200</a>
+Chapter 6.4: THE MODEL-TRUST REGION APPROACH</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="continuate.linalg.newton.krylov_hook_step">
+<code class="descclassname">continuate.linalg.newton.</code><code class="descname">krylov_hook_step</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>r</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/newton.html#krylov_hook_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.newton.krylov_hook_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>optimal hook step with Krylov subspace method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>A</strong> : LinearOperator</p>
+<p><strong>b</strong> : numpy.array</p>
+<p><strong>r</strong> : float</p>
+<blockquote>
+<div><p>trusted region</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(numpy.array, float)</p>
+<blockquote class="last">
+<div><p>argmin of xi, and nu</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="continuate.linalg.newton.newton">
+<code class="descclassname">continuate.linalg.newton.</code><code class="descname">newton</code><span class="sig-paren">(</span><em>func</em>, <em>x0</em>, <em>ftol=1e-05</em>, <em>maxiter=100</em>, <em>inner_tol=1e-06</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/newton.html#newton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.newton.newton" title="Permalink to this definition">¶</a></dt>
+<dd><p>solve multi-dimensional equation <cite>F(x) = 0</cite> using Newton-Krylov method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>func: numpy.array -&gt; numpy.array</strong></p>
+<blockquote>
+<div><p><cite>F</cite></p>
+</div></blockquote>
+<p><strong>x0: numpy.array</strong></p>
+<blockquote>
+<div><p>initial guess of the solution</p>
+</div></blockquote>
+<p><strong>ftol: float, optional</strong></p>
+<blockquote>
+<div><p>tolerance of the iteration</p>
+</div></blockquote>
+<p><strong>maxiter: int, optional</strong></p>
+<blockquote>
+<div><p>maximum number of trial</p>
+</div></blockquote>
+<p><strong>inner_tol: float, optional</strong></p>
+<blockquote>
+<div><p>tolerance of linear solver (use scipy.sparse.linalg.gmres)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">numpy.array</p>
+<blockquote class="last">
+<div><p>The solution <cite>x</cite> satisfies <cite>F(x)=0</cite></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="continuate.linalg.newton.newton_krylov_hook">
+<code class="descclassname">continuate.linalg.newton.</code><code class="descname">newton_krylov_hook</code><span class="sig-paren">(</span><em>func</em>, <em>x0</em>, <em>r=0.01</em>, <em>ftol=1e-05</em>, <em>maxiter=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/linalg/newton.html#newton_krylov_hook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.linalg.newton.newton_krylov_hook" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/linalg.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">continuate 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Toshiki Teramura.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

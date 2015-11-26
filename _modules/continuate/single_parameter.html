@@ -61,7 +61,7 @@
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">DEBUG</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="tangent_vector"><a class="viewcode-back" href="../../continuate.html#continuate.single_parameter.tangent_vector">[docs]</a><span class="k">def</span> <span class="nf">tangent_vector</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">alpha_mu</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="tangent_vector"><a class="viewcode-back" href="../../single_parameter.html#continuate.single_parameter.tangent_vector">[docs]</a><span class="k">def</span> <span class="nf">tangent_vector</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">alpha_mu</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tangent vector at (x, mu)</span>
 
@@ -93,7 +93,7 @@
     <span class="k">return</span> <span class="n">inv_norm</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span> <span class="n">inv_norm</span>
 
 </div>
-<div class="viewcode-block" id="continuate"><a class="viewcode-back" href="../../continuate.html#continuate.single_parameter.continuate">[docs]</a><span class="k">def</span> <span class="nf">continuate</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+<div class="viewcode-block" id="continuate"><a class="viewcode-back" href="../../single_parameter.html#continuate.single_parameter.continuate">[docs]</a><span class="k">def</span> <span class="nf">continuate</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A generator for continuation</span>
 
