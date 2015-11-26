@@ -1,0 +1,4 @@
+[submodule "doc/build/html"]
+	path = doc/build/html
+	url = https://termoshtt@github.com/termoshtt/continuate.git
+	branch = gh-pages
