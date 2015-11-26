@@ -14,6 +14,10 @@ Please install from PyPI
 pip install continuate
 ```
 
+Sample
+-------
+- [single parameter continuation](sample/single_parameter.ipynb)
+
 Document
 ---------
 See http://termoshtt.github.io/continuate
