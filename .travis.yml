@@ -10,9 +10,9 @@ cache:
 addons:
   apt:
     packages:
-      - libblas-dev
-      - liblapack-dev
-      - libfftpack-dev
-      - gfortran
+      - python-scipy
+
+virtualenv:
+  system_site_packages: true
 
 script: nosetests -v --with-doctest
