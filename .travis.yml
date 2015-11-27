@@ -2,7 +2,8 @@ sudo: false
 
 language: python
 python:
-  - "3.5"
+  - "2.7"
+  - "3.2"
 
 cache:
   apt: true
@@ -10,9 +11,10 @@ cache:
 addons:
   apt:
     packages:
-      - libblas-dev
-      - liblapack-dev
-      - libfftpack-dev
-      - gfortran
+      - python-scipy
+      - python3-scipy
+
+virtualenv:
+  system_site_packages: true
 
 script: nosetests -v --with-doctest
