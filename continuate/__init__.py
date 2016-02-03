@@ -1,2 +1,8 @@
 # -*- coding: utf-8 -*-
-all = ["linalg", "single_parameter"]
+
+import importlib
+
+__all__ = ["linalg", "single_parameter"]
+
+for m in __all__:
+    importlib.import_module("continuate." + m)
