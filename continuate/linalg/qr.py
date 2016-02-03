@@ -2,6 +2,9 @@
 
 
 import numpy as np
+from logging import getLogger, DEBUG
+logger = getLogger(__name__)
+logger.setLevel(DEBUG)
 
 
 class MGS(object):
@@ -10,10 +13,10 @@ class MGS(object):
     >>> mgs = MGS()
     >>> for i in range(10):
     ...     u = np.random.random(9)
-    ...     prod, norm = mgs(u)
+    ...     prod = mgs(u)
     >>> len(mgs) == 9  # last insert does not add vector
     True
-    >>> np.allclose(norm, 0)
+    >>> np.allclose(prod[-1], 0)
     True
     >>> ortho = []
     >>> for i in range(len(mgs)):
@@ -46,7 +49,10 @@ class MGS(object):
         for v in self.v:
             uv = self.dot(u, v)
             u -= uv * v
+            inner_prod.append(uv)
         u_norm = np.sqrt(self.dot(u, u))
+        inner_prod.append(u_norm)
         if u_norm > self.e:
+            logger.info("Vector is in current linear space")
             self.v.append(u / u_norm)
-        return np.array(inner_prod), u_norm
+        return np.array(inner_prod)
