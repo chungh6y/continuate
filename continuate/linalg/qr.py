@@ -49,4 +49,4 @@ class MGS(object):
         u_norm = np.sqrt(self.dot(u, u))
         if u_norm > self.e:
             self.v.append(u / u_norm)
-        return inner_prod, u_norm
+        return np.array(inner_prod), u_norm
