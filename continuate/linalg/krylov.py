@@ -48,8 +48,8 @@ class Arnoldi(object):
 
 
 def arnoldi(A, b, **kwds):
-    A = Arnoldi(A, b, **kwds)
-    return A.projected_matrix(), A.basis()
+    O = Arnoldi(A, b, **kwds)
+    return O.projected_matrix(), O.basis()
 
 
 def solve_Hessenberg(H, b):

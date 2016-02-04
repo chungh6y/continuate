@@ -95,3 +95,12 @@ class TestKrylov(TestCase):
         c = np.zeros(N)
         c[0] = 1
         np.testing.assert_almost_equal(np.dot(H, g), c)
+
+    def test_gmres(self):
+        N = 5
+        rand = np.random.rand(N, N)
+        A = linalg.LinearOperator((N, N), matvec=lambda x: np.dot(rand, x), dtype=np.float64)
+        x = np.random.rand(N)
+        b = A * x
+        y = krylov.gmres(A, b)
+        np.testing.assert_almost_equal(y, x)
