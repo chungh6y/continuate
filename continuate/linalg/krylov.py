@@ -49,3 +49,20 @@ class Arnoldi(object):
 def arnoldi(A, b, **kwds):
     A = Arnoldi(A, b, **kwds)
     return A.projected_matrix(), A.basis()
+
+
+def solve_Hessenberg(H, b):
+    N = len(H)
+    g = np.zeros((N, 1))
+    g[0, 0] = b
+    Hg = np.concatenate((H, g), axis=1)
+    for i in range(N):
+        Hg[i, i+1:] /= Hg[i, i]
+        Hg[i, i] = 1
+        if i == N-1:
+            break
+        Hg[i+1, i:] -= Hg[i+1, i] * Hg[i, i:]
+    for i in reversed(range(1, N)):
+        Hg[:i, N] -= Hg[i, N] * Hg[:i, i]
+        Hg[:i, i] = 0
+    return Hg[:, N]

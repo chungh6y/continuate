@@ -83,3 +83,15 @@ class TestKrylov(TestCase):
         np.testing.assert_almost_equal(np.dot(V.T, V), np.identity(N))
         np.testing.assert_almost_equal(np.dot(V, V.T), np.identity(N))
         np.testing.assert_almost_equal(A * V, np.dot(V, H))
+
+    def test_solve_Hessenberg(self):
+        N = 5
+        rand = np.random.rand(N, N)
+        A = linalg.LinearOperator((N, N), matvec=lambda x: np.dot(rand, x), dtype=np.float64)
+        b = np.random.rand(N)
+        O = krylov.Arnoldi(A, b)
+        H = O.projected_matrix()
+        g = krylov.solve_Hessenberg(H, 1)
+        c = np.zeros(N)
+        c[0] = 1
+        np.testing.assert_almost_equal(np.dot(H, g), c)
