@@ -10,9 +10,10 @@ logger.setLevel(DEBUG)
 
 class Arnoldi(object):
 
-    def __init__(self, A, b, eps=1e-6, initialize=True):
+    def __init__(self, A, b, eps=1e-6, initialize=True, dot=np.dot):
         self.A = A
-        self.ortho = qr.MGS()
+        self.dot = dot
+        self.ortho = qr.MGS(eps=eps, dot=dot)
         self.ortho(b)
         self.eps = eps
         self.coefs = []
@@ -66,3 +67,9 @@ def solve_Hessenberg(H, b):
         Hg[:i, N] -= Hg[i, N] * Hg[:i, i]
         Hg[:i, i] = 0
     return Hg[:, N]
+
+
+def gmres(A, b, eps=1e-6, dot=np.dot):
+    H, V = arnoldi(A, b, eps=eps, dot=dot)
+    g = solve_Hessenberg(H, np.sqrt(dot(b, b)))
+    return dot(V, g)
