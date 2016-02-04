@@ -53,6 +53,6 @@ class MGS(object):
         u_norm = np.sqrt(self.dot(u, u))
         inner_prod.append(u_norm)
         if u_norm > self.e:
-            logger.info("Vector is in current linear space")
+            logger.info("Add new dimension")
             self.v.append(u / u_norm)
         return np.array(inner_prod)

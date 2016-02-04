@@ -26,7 +26,7 @@ class Arnoldi(object):
         return self.ortho[i]
 
     def basis(self):
-        return self.__iter__()
+        return np.stack(self).T
 
     def calc(self):
         while True:
@@ -48,4 +48,4 @@ class Arnoldi(object):
 
 def arnoldi(A, b, **kwds):
     A = Arnoldi(A, b, **kwds)
-    return A.projected_matrix(), np.stack(A)
+    return A.projected_matrix(), A.basis()
