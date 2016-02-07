@@ -47,11 +47,7 @@ def Jacobi(func, x0, alpha=1e-7, fx=None):
 
 
 def _inv(A, b, tol=1e-6):
-    x, res = linalg.gmres(A, b, tol=tol)
-    if res:
-        logger.info("Iteration of GMRES does not convergent, res={:d}".format(res))
-        raise RuntimeError("Not convergent (GMRES)")
-    return x
+    return krylov.gmres(A, b, eps=tol)
 
 
 def newton(func, x0, ftol=1e-5, maxiter=100, inner_tol=1e-6):
@@ -80,7 +76,7 @@ def newton(func, x0, ftol=1e-5, maxiter=100, inner_tol=1e-6):
     for t in range(maxiter):
         fx = func(x0)
         res = np.linalg.norm(fx)
-        logger.debug('count:{:d}\tresidual:{:e}'.format(t, res))
+        logger.info('Newton iteration: Count={:d}, Residual={:e}'.format(t, res))
         if res <= ftol:
             return x0
         A = Jacobi(func, x0, fx=fx)

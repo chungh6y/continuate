@@ -71,10 +71,13 @@ class Arnoldi(object):
             H[:n, i] = c[:n]
         return H
 
+    def __call__(self):
+        return self.projected_matrix(), self.basis()
+
 
 def arnoldi(A, b, **kwds):
     O = Arnoldi(A, b, **kwds)
-    return O.projected_matrix(), O.basis()
+    return O()
 
 
 def solve_Hessenberg(H, b):
