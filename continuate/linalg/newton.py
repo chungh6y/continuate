@@ -210,7 +210,7 @@ def krylov_hook_step(A, b, r, **kwds):
     beta = np.zeros(H.shape[0])
     beta[0] = np.linalg.norm(b)
     xi, nu = hook_step(H, beta, r, **kwds)
-    return np.dot(V, xi), nu
+    return np.dot(V[:, :len(xi)], xi), nu
 
 
 def newton_krylov_hook(func, x0, r=1e-2, ftol=1e-5, maxiter=100):
