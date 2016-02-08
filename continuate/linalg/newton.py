@@ -2,6 +2,7 @@
 
 import numpy as np
 import scipy.sparse.linalg as linalg
+from itertools import count as icount
 from . import krylov
 
 from logging import getLogger, DEBUG
@@ -49,11 +50,12 @@ def Jacobi(func, x0, alpha=1e-7, fx=None):
 class Hessian(object):
     """ Calculate the deviation from linear approximation """
 
-    def __init__(self, func, x0):
+    def __init__(self, func, x0, alpha=1e-7):
         self.fx0 = func(x0)
-        self.A = Jacobi(func, x0, fx=self.fx0)
+        self.A = Jacobi(func, x0, fx=self.fx0, alpha=1e-7)
         self.f = func
         self.x0 = x0
+        self.alpha = alpha
 
     def __call__(self, v):
         return np.linalg.norm(self.deviation(v))
@@ -61,7 +63,7 @@ class Hessian(object):
     def deviation(self, v):
         return self.f(self.x0 + v) - (self.fx0 + self.A * v)
 
-    def trusted_region(self, v, eps, r0, p=2):
+    def trusted_region(self, v, eps, r0=None, p=2):
         """ Estimate the trusted region in which the deviation is smaller than `eps`.
 
         Parameters
@@ -77,11 +79,15 @@ class Hessian(object):
             radius of the trusted region
 
         """
-        r = r0
+        if type(r0) is float:
+            r = r0
+        else:
+            r = 100*self.alpha
         v = v / np.linalg.norm(v)
         p = max(p, 1.0/p)
-        while True:
+        for c in icount():
             e = self(r*v)
+            logger.info("Trusted Region iteration: Count={}, Deviation={}".format(c, e))
             if (e > eps/p) and (e < eps*p):
                 return r
             r = r * np.sqrt(eps / e)
