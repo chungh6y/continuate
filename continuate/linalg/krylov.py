@@ -52,7 +52,7 @@ class Arnoldi(object):
             logger.debug("|Av|={}".format(norm_Av))
             logger.debug("(v, Av)/|Av|={}".format(self.dot(v, Av) / norm_Av))
             coef = self.ortho(Av)
-            self.residual *= coef[-1]
+            self.residual *= coef[-1] / norm(coef, dot=self.dot)
             logger.info("Arnoldi: Count={}, Residual={}"
                         .format(c, self.residual))
             self.coefs.append(coef)
