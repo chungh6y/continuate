@@ -46,6 +46,47 @@ def Jacobi(func, x0, alpha=1e-7, fx=None):
     return linalg.LinearOperator((len(x0), len(x0)), matvec=wrap, dtype=x0.dtype)
 
 
+class Hessian(object):
+    """ Calculate the deviation from linear approximation """
+
+    def __init__(self, func, x0):
+        self.fx0 = func(x0)
+        self.A = Jacobi(func, x0, fx=self.fx0)
+        self.f = func
+        self.x0 = x0
+
+    def __call__(self, v):
+        return np.linalg.norm(self.deviation(v))
+
+    def deviation(self, v):
+        return self.f(self.x0 + v) - (self.fx0 + self.A * v)
+
+    def trusted_region(self, v, eps, r0, p=2):
+        """ Estimate the trusted region in which the deviation is smaller than `eps`.
+
+        Parameters
+        ------------
+        eps : float
+            Destination value of deviation
+        p : float, optional (default=2)
+            Iteration will end if the deviation is in `[eps/p, eps*p]`.
+
+        Return
+        -------
+        r : float
+            radius of the trusted region
+
+        """
+        r = r0
+        v = v / np.linalg.norm(v)
+        p = max(p, 1.0/p)
+        while True:
+            e = self(r*v)
+            if (e > eps/p) and (e < eps*p):
+                return r
+            r = r * np.sqrt(eps / e)
+
+
 def _inv(A, b, tol=1e-6):
     return krylov.gmres(A, b, eps=tol)
 
