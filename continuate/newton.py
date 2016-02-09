@@ -173,7 +173,7 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
 
     """
     logger = Logger(__name__, "Hook step")
-    logger.debug({"nu": nu, "r": r, })
+    logger.debug({"nu0": nu, "trusted_region": r, })
     r2 = r * r
     I = np.matrix(np.identity(len(b), dtype=b.dtype))
     AA = A.T * A
@@ -182,11 +182,14 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
         B = np.array(np.linalg.inv(AA - nu * I))
         xi = np.dot(B, Ab)
         Psi = np.dot(xi, xi)
-        logger.debug({"Psi": Psi, })
+        logger.info({
+            "count": t,
+            "Psi": Psi,
+        })
         if abs(Psi - r2) < e * r2:
             tmp = Ab + np.dot(AA, xi)
             value = np.dot(xi, tmp)
-            logger.debug("value:{:e}".format(value))
+            logger.debug({"(xi, A*b+A.T*A*xi)": value, })
             if value > 0:
                 # In this case, the value of nu may be not accurate
                 logger.info("Convergent into maximum")
