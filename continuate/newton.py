@@ -3,11 +3,8 @@
 import numpy as np
 import scipy.sparse.linalg as linalg
 from itertools import count as icount
+from . import Logger
 from . import krylov
-
-from logging import getLogger, DEBUG
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
 
 
 def Jacobi(func, x0, alpha=1e-7, fx=None):
@@ -44,11 +41,17 @@ def Jacobi(func, x0, alpha=1e-7, fx=None):
         r = alpha / norm
         return (func(x0 + r * v) - fx) / r
 
-    return linalg.LinearOperator((len(x0), len(x0)), matvec=wrap, dtype=x0.dtype)
+    return linalg.LinearOperator(
+        (len(x0), len(x0)),
+        matvec=wrap,
+        dtype=x0.dtype
+    )
 
 
 class Hessian(object):
     """ Calculate the deviation from linear approximation """
+
+    logger = Logger(__name__, "Hessian")
 
     def __init__(self, func, x0, alpha=1e-7):
         self.fx0 = func(x0)
@@ -87,7 +90,10 @@ class Hessian(object):
         p = max(p, 1.0/p)
         for c in icount():
             e = self(r*v)
-            logger.info("Trusted Region iteration: Count={}, Deviation={}".format(c, e))
+            self.logger.info({
+                "count": c,
+                "deviation": e,
+            })
             if (e > eps/p) and (e < eps*p):
                 return r
             r = r * np.sqrt(eps / e)
@@ -120,10 +126,14 @@ def newton(func, x0, ftol=1e-5, maxiter=100, inner_tol=1e-6):
         The solution `x` satisfies `F(x)=0`
 
     """
+    logger = Logger(__name__, "Newton")
     for t in range(maxiter):
         fx = func(x0)
         res = np.linalg.norm(fx)
-        logger.info('Newton iteration: Count={:d}, Residual={:e}'.format(t, res))
+        logger.info({
+            "count": t,
+            "residual": res,
+        })
         if res <= ftol:
             return x0
         A = Jacobi(func, x0, fx=fx)
@@ -162,8 +172,8 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
       Chapter 6.4: THE MODEL-TRUST REGION APPROACH
 
     """
-    logger.debug("nu:{:e}".format(nu))
-    logger.debug("r:{:e}".format(r))
+    logger = Logger(__name__, "Hook step")
+    logger.debug({"nu0": nu, "trusted_region": r, })
     r2 = r * r
     I = np.matrix(np.identity(len(b), dtype=b.dtype))
     AA = A.T * A
@@ -172,11 +182,14 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
         B = np.array(np.linalg.inv(AA - nu * I))
         xi = np.dot(B, Ab)
         Psi = np.dot(xi, xi)
-        logger.debug("Psi:{:e}".format(Psi))
+        logger.info({
+            "count": t,
+            "Psi": Psi,
+        })
         if abs(Psi - r2) < e * r2:
             tmp = Ab + np.dot(AA, xi)
             value = np.dot(xi, tmp)
-            logger.debug("value:{:e}".format(value))
+            logger.debug({"(xi, A*b+A.T*A*xi)": value, })
             if value > 0:
                 # In this case, the value of nu may be not accurate
                 logger.info("Convergent into maximum")
@@ -214,6 +227,7 @@ def krylov_hook_step(A, b, r, **kwds):
 
 
 def newton_krylov_hook(func, x0, r=1e-2, ftol=1e-5, maxiter=100):
+    logger = Logger(__name__, "NewtonKrylovHook")
     nu = 0.0
     for t in range(maxiter):
         fx = func(x0)
@@ -222,14 +236,17 @@ def newton_krylov_hook(func, x0, r=1e-2, ftol=1e-5, maxiter=100):
             res_pre = res
         if res > res_pre:
             raise RuntimeError("Invalid trusted region")
-        logger.debug('count:{:d}\tresidue:{:e}'.format(t, res))
+        logger.info({
+            "count": t,
+            "residual": res,
+        })
         if res <= ftol:
             return x0
         A = Jacobi(func, x0, fx=fx)
         b = -fx
         dx = _inv(A, b)
         dx_norm = np.linalg.norm(dx)
-        logger.debug('dx_norm:{:e}'.format(dx_norm))
+        logger.debug({"|dx|": dx_norm, })
         if dx_norm < r:
             logger.info('in Trusted region')
             x0 = x0 + dx
