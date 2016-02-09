@@ -2,11 +2,8 @@
 
 import numpy as np
 from itertools import count as icount
+from . import Logger
 from . import qr
-
-from logging import getLogger, DEBUG
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
 
 
 def norm(v, dot=np.dot):
@@ -24,6 +21,8 @@ class Arnoldi(object):
         Approximated (projected) matrix norm of `A`
 
     """
+
+    logger = Logger(__name__, "Arnoldi")
 
     def __init__(self, A, b, eps=1e-6, dot=np.dot):
         self.A = A
@@ -49,15 +48,15 @@ class Arnoldi(object):
             Av = self.A * v
             norm_Av = norm(Av, dot=self.dot)
             self.matrix_norm = max(self.matrix_norm, norm_Av)
-            logger.debug("|Av|={}".format(norm_Av))
-            logger.debug("(v, Av)/|Av|={}".format(self.dot(v, Av) / norm_Av))
             coef = self.ortho(Av)
             self.residual *= coef[-1] / norm(coef, dot=self.dot)
-            logger.info("Arnoldi: Count={}, Residual={}"
-                        .format(c, self.residual))
+            self.logger.info({
+                "count": c,
+                "residual": self.residual,
+            })
             self.coefs.append(coef)
             if self.residual < self.eps:
-                logger.info("Matrix Norm={}".format(self.matrix_norm))
+                self.logger.info({"matrix_norm": self.matrix_norm, })
                 return
 
     def basis(self):
