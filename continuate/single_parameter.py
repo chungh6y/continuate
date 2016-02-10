@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .linalg.newton import Jacobi
+from .newton import Jacobi
 
 import numpy as np
 import scipy.optimize as opt

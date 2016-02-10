@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
+from . import Logger
 import numpy as np
-from logging import getLogger, DEBUG
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
 
 
 class MGS(object):
@@ -30,6 +27,8 @@ class MGS(object):
 
     """
 
+    logger = Logger(__name__, "MGS")
+
     def __init__(self, eps=1e-9, dot=np.dot):
         self.v = []
         self.dot = dot
@@ -53,6 +52,14 @@ class MGS(object):
         u_norm = np.sqrt(self.dot(u, u))
         inner_prod.append(u_norm)
         if u_norm > self.e:
-            logger.info("Add new dimension")
             self.v.append(u / u_norm)
+            self.logger.info({
+                "message": "Add new dimension",
+                "dimension": len(self.v),
+            })
+        else:
+            self.logger.info({
+                "message": "Linearly dependent",
+                "dimension": len(self.v),
+            })
         return np.array(inner_prod)
