@@ -12,5 +12,5 @@ setup(name="continuate",
       license="MIT",
       keywords="science",
       url="http://github.com/termoshtt/continuate",
-      packages=["continuate", "continuate.linalg"]
+      packages=["continuate"]
       )
