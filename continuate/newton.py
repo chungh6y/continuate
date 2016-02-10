@@ -212,13 +212,18 @@ def newton_krylov_hook_gen(func, x0, r=1e-2, inner_tol=1e-6, **kwds):
     Returns
     --------
     generator
-        yields `(x, func(x))`
+        yields `(x, |func(x)|, func(x))`
     """
     logger = Logger(__name__, "NewtonKrylovHook")
     nu = 0.0
-    while True:
+    for t in icount():
         fx = func(x0)
-        yield x0, fx
+        res = np.linalg.norm(fx)
+        logger.info({
+            "count": t,
+            "residual": res,
+        })
+        yield x0, res, fx
         A = Jacobi(func, x0, fx=fx)
         b = -fx
         H, V = krylov.arnoldi(A, b, eps=inner_tol)
@@ -242,12 +247,7 @@ def newton_krylov_hook(func, x0, r=1e-2, ftol=1e-5, inner_tol=1e-6,
                        maxiter=100, **kwds):
     logger = Logger(__name__, "NewtonKrylovHook")
     gen = newton_krylov_hook_gen(func, x0, r=r, inner_tol=inner_tol, **kwds)
-    for t, (x, fx) in enumerate(gen):
-        res = np.linalg.norm(fx)
-        logger.info({
-            "count": t,
-            "residual": res,
-        })
+    for t, (x, res, _) in enumerate(gen):
         if res < ftol:
             return x
         if t > maxiter:
