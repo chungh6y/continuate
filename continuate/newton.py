@@ -61,7 +61,10 @@ class Hessian(object):
         self.alpha = alpha
 
     def __call__(self, v):
-        return np.linalg.norm(self.deviation(v))
+        fxv = self.f(self.x0 + v)
+        Av = self.A * v
+        nrm = max(map(np.linalg.norm, [self.fx0, fxv, self.fx0 + Av]))
+        return np.linalg.norm(fxv - (self.fx0 + Av)) / nrm
 
     def deviation(self, v):
         return self.f(self.x0 + v) - (self.fx0 + self.A * v)
@@ -99,10 +102,6 @@ class Hessian(object):
             r = r * np.sqrt(eps / e)
 
 
-def _inv(A, b, tol=1e-6):
-    return krylov.gmres(A, b, eps=tol)
-
-
 def newton(func, x0, ftol=1e-5, maxiter=100, inner_tol=1e-6):
     """
     solve multi-dimensional equation `F(x) = 0` using Newton-Krylov method.
@@ -137,7 +136,7 @@ def newton(func, x0, ftol=1e-5, maxiter=100, inner_tol=1e-6):
         if res <= ftol:
             return x0
         A = Jacobi(func, x0, fx=fx)
-        dx = _inv(A, -fx, tol=inner_tol)
+        dx = krylov.gmres(A, -fx, eps=inner_tol)
         x0 = x0 + dx
     raise RuntimeError("Not convergent (Newton)")
 
@@ -202,56 +201,54 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
     raise RuntimeError("Not convergent (hook-step)")
 
 
-def krylov_hook_step(A, b, r, **kwds):
-    """
-    optimal hook step with Krylov subspace method
+def newton_krylov_hook_gen(func, x0, r=1e-2, inner_tol=1e-6, **kwds):
+    """ Generator of Newton-Krylov-hook iteration
 
     Parameters
-    ----------
-    A : LinearOperator
-    b : numpy.array
-    r : float
-        trusted region
+    -----------
+    r : float, optional(default=1e-2)
+        Initial guess of the radius of trusted region
 
     Returns
     --------
-    (numpy.array, float)
-        argmin of xi, and nu
-
+    generator
+        yields `(x, func(x))`
     """
-    H, V = krylov.arnoldi(A, b)
-    beta = np.zeros(H.shape[0])
-    beta[0] = np.linalg.norm(b)
-    xi, nu = hook_step(H, beta, r, **kwds)
-    return np.dot(V[:, :len(xi)], xi), nu
-
-
-def newton_krylov_hook(func, x0, r=1e-2, ftol=1e-5, maxiter=100):
     logger = Logger(__name__, "NewtonKrylovHook")
     nu = 0.0
-    for t in range(maxiter):
+    for t in icount():
         fx = func(x0)
+        yield x0, fx
+        A = Jacobi(func, x0, fx=fx)
+        b = -fx
+        H, V = krylov.arnoldi(A, b, eps=inner_tol)
+        g = krylov.solve_Hessenberg(H, np.linalg.norm(b))
+        dx = np.dot(V[:, :len(g)], g)
+        dx_norm = np.linalg.norm(dx)
+        logger.info({"|dx|": dx_norm, })
+        if dx_norm < r:
+            logger.info('in Trusted region')
+            x0 = x0 + dx
+        else:
+            logger.info('hook step')
+            beta = np.zeros(H.shape[0])
+            beta[0] = np.linalg.norm(b)
+            xi, nu = hook_step(H, beta, r, nu=nu)
+            dx = np.dot(V[:, :len(xi)], xi)
+            x0 = x0 - dx
+
+
+def newton_krylov_hook(func, x0, r=1e-2, ftol=1e-5, inner_tol=1e-6,
+                       maxiter=100, **kwds):
+    logger = Logger(__name__, "NewtonKrylovHook")
+    gen = newton_krylov_hook_gen(func, x0, r=r, inner_tol=inner_tol, **kwds)
+    for t, (x, fx) in enumerate(gen):
         res = np.linalg.norm(fx)
-        if t == 0:
-            res_pre = res
-        if res > res_pre:
-            raise RuntimeError("Invalid trusted region")
         logger.info({
             "count": t,
             "residual": res,
         })
-        if res <= ftol:
-            return x0
-        A = Jacobi(func, x0, fx=fx)
-        b = -fx
-        dx = _inv(A, b)
-        dx_norm = np.linalg.norm(dx)
-        logger.debug({"|dx|": dx_norm, })
-        if dx_norm < r:
-            logger.info('in Trusted region')
-            x0 = x0 + dx
-            continue
-        logger.info('hook step')
-        dx, nu = krylov_hook_step(A, b, r, nu=nu)
-        x0 = x0 - dx
-    raise RuntimeError("Not convergent (Newton-hook)")
+        if res < ftol:
+            return x
+        if t > maxiter:
+            raise RuntimeError("Not Convergent (Newton-Krylov-hook)")
