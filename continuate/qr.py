@@ -53,6 +53,13 @@ class MGS(object):
         inner_prod.append(u_norm)
         if u_norm > self.e:
             self.v.append(u / u_norm)
+            self.logger.info({
+                "message": "Add new dimension",
+                "dimension": len(self.v),
+            })
         else:
-            self.logger.info("Linearly dependent")
+            self.logger.info({
+                "message": "Linearly dependent",
+                "dimension": len(self.v),
+            })
         return np.array(inner_prod)

@@ -49,7 +49,7 @@ class Arnoldi(object):
             norm_Av = norm(Av, dot=self.dot)
             self.matrix_norm = max(self.matrix_norm, norm_Av)
             coef = self.ortho(Av)
-            self.residual *= coef[-1] / norm(coef, dot=self.dot)
+            self.residual *= coef[-1]
             self.logger.info({
                 "count": c,
                 "residual": self.residual,
@@ -83,6 +83,8 @@ def solve_Hessenberg(H, b):
     N = len(H)
     g = np.zeros((N, 1))
     g[0, 0] = b
+    if N == 1:
+        return g[:, 0] / H[0, 0]
     Hg = np.concatenate((H, g), axis=1)
     for i in range(N):
         Hg[i, i+1:] /= Hg[i, i]

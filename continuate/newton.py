@@ -216,7 +216,7 @@ def newton_krylov_hook_gen(func, x0, r=1e-2, inner_tol=1e-6, **kwds):
     """
     logger = Logger(__name__, "NewtonKrylovHook")
     nu = 0.0
-    for t in icount():
+    while True:
         fx = func(x0)
         yield x0, fx
         A = Jacobi(func, x0, fx=fx)
