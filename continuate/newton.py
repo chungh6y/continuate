@@ -173,31 +173,27 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
     """
     logger = Logger(__name__, "Hook step")
     logger.debug({"nu0": nu, "trusted_region": r, })
-    r2 = r * r
     I = np.matrix(np.identity(len(b), dtype=b.dtype))
-    AA = A.T * A
+    AA = np.dot(A.T, A)
     Ab = np.dot(A.T, b)
     for t in range(maxiter):
-        B = np.array(np.linalg.inv(AA - nu * I))
-        xi = np.dot(B, Ab)
-        Psi = np.dot(xi, xi)
+        xi = np.linalg.solve(AA+nu*I, Ab)
+        xi_norm = np.linalg.norm(xi)
+        Psi = xi_norm - r
         logger.info({
             "count": t,
-            "Psi": Psi,
+            "1-|xi|/r": Psi / r,
         })
-        if abs(Psi - r2) < e * r2:
-            tmp = Ab + np.dot(AA, xi)
-            value = np.dot(xi, tmp)
-            logger.debug({"(xi, A*b+A.T*A*xi)": value, })
-            if value > 0:
-                # In this case, the value of nu may be not accurate
-                logger.info("Convergent into maximum")
-                return -xi, tmp[0] / xi[0]
+        if abs(Psi) < e * r:
             return xi, nu
-        dPsi = 2 * np.dot(xi, np.dot(B, xi))
-        a = - Psi * Psi / dPsi
-        b = - Psi / dPsi - nu
-        nu = a / r2 - b
+        dPsi = -np.dot(xi, np.linalg.solve(AA+nu*I, xi)) / xi_norm
+        nu = nu - (xi_norm*Psi) / (r*dPsi)
+        logger.debug({
+            "count": t,
+            "Psi": Psi,
+            "dPsi": dPsi,
+            "nu": nu,
+        })
     raise RuntimeError("Not convergent (hook-step)")
 
 
@@ -240,12 +236,11 @@ def newton_krylov_hook_gen(func, x0, r=1e-2, inner_tol=1e-6, **kwds):
             beta[0] = np.linalg.norm(b)
             xi, nu = hook_step(H, beta, r, nu=nu)
             dx = np.dot(V[:, :len(xi)], xi)
-            x0 = x0 - dx
+            x0 = x0 + dx
 
 
 def newton_krylov_hook(func, x0, r=1e-2, ftol=1e-5, inner_tol=1e-6,
                        maxiter=100, **kwds):
-    logger = Logger(__name__, "NewtonKrylovHook")
     gen = newton_krylov_hook_gen(func, x0, r=r, inner_tol=inner_tol, **kwds)
     for t, (x, res, _) in enumerate(gen):
         if res < ftol:
