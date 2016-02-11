@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>continuate.krylov &mdash; continuate 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="continuate 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="continuate" href="../continuate.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../continuate.html" accesskey="U">continuate</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for continuate.krylov</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span> <span class="k">as</span> <span class="n">icount</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">qr</span>
+
+
+<div class="viewcode-block" id="norm"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.norm">[docs]</a><span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="Arnoldi"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.Arnoldi">[docs]</a><span class="k">class</span> <span class="nc">Arnoldi</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Construct Krylov subspace (Arnoldi process)</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    -----------</span>
+<span class="sd">    residual : float</span>
+<span class="sd">        The residual of Arnoldi Process</span>
+<span class="sd">    matrix_norm : float</span>
+<span class="sd">        Approximated (projected) matrix norm of `A`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Arnoldi&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dot</span> <span class="o">=</span> <span class="n">dot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span> <span class="o">=</span> <span class="n">qr</span><span class="o">.</span><span class="n">MGS</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">dot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coefs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span><span class="o">.</span><span class="n">__iter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_calc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Main process of Arnoldi process &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_norm</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">icount</span><span class="p">():</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">Av</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">*</span> <span class="n">v</span>
+            <span class="n">norm_Av</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">Av</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_norm</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_norm</span><span class="p">,</span> <span class="n">norm_Av</span><span class="p">)</span>
+            <span class="n">coef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span><span class="p">(</span><span class="n">Av</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">*=</span> <span class="n">coef</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">({</span>
+                <span class="s">&quot;count&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span>
+                <span class="s">&quot;residual&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span><span class="p">,</span>
+            <span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coefs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">({</span><span class="s">&quot;matrix_norm&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_norm</span><span class="p">,</span> <span class="p">})</span>
+                <span class="k">return</span>
+
+<div class="viewcode-block" id="Arnoldi.basis"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.Arnoldi.basis">[docs]</a>    <span class="k">def</span> <span class="nf">basis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+</div>
+<div class="viewcode-block" id="Arnoldi.projected_matrix"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.Arnoldi.projected_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">projected_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coefs</span><span class="p">)</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coefs</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">H</span><span class="p">[:</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[:</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">H</span>
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_matrix</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="arnoldi"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.arnoldi">[docs]</a><span class="k">def</span> <span class="nf">arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="n">O</span> <span class="o">=</span> <span class="n">Arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">O</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="solve_Hessenberg"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.solve_Hessenberg">[docs]</a><span class="k">def</span> <span class="nf">solve_Hessenberg</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
+    <span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">g</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">H</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">Hg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">H</span><span class="p">,</span> <span class="n">g</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">Hg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span> <span class="o">/=</span> <span class="n">Hg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">Hg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">Hg</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">:]</span> <span class="o">-=</span> <span class="n">Hg</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">Hg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">:]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)):</span>
+        <span class="n">Hg</span><span class="p">[:</span><span class="n">i</span><span class="p">,</span> <span class="n">N</span><span class="p">]</span> <span class="o">-=</span> <span class="n">Hg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="n">Hg</span><span class="p">[:</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">Hg</span><span class="p">[:</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">Hg</span><span class="p">[:,</span> <span class="n">N</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="gmres"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.gmres">[docs]</a><span class="k">def</span> <span class="nf">gmres</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">):</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">dot</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">solve_Hessenberg</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">norm</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">dot</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">[:,</span> <span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)],</span> <span class="n">g</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../continuate.html" >continuate</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Toshiki Teramura.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
