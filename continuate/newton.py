@@ -161,7 +161,6 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
     --------
     (numpy.array, float)
         argmin of xi, and nu (Lagrange multiplier)
-        CAUTION: nu may be not accurate
 
     References
     ----------
@@ -176,6 +175,9 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
     I = np.matrix(np.identity(len(b), dtype=b.dtype))
     AA = np.dot(A.T, A)
     Ab = np.dot(A.T, b)
+    xi = np.linalg.solve(AA, Ab)
+    if np.linalg.norm(xi) < r:
+        return xi, 0
     for t in range(maxiter):
         xi = np.linalg.solve(AA+nu*I, Ab)
         xi_norm = np.linalg.norm(xi)
@@ -188,6 +190,9 @@ def hook_step(A, b, r, nu=0, maxiter=100, e=0.1):
             return xi, nu
         dPsi = -np.dot(xi, np.linalg.solve(AA+nu*I, xi)) / xi_norm
         nu = nu - (xi_norm*Psi) / (r*dPsi)
+        if nu < 0:
+            logger.debug("Negative nu, reset to zero")
+            nu = 0
         logger.debug({
             "count": t,
             "Psi": Psi,
