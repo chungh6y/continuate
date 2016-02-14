@@ -3,7 +3,7 @@
 import numpy as np
 import scipy.sparse.linalg as linalg
 from itertools import count as icount
-from . import Logger
+from .logger import Logger
 from . import krylov
 
 

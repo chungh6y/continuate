@@ -2,7 +2,7 @@
 
 import numpy as np
 from itertools import count as icount
-from . import Logger
+from .logger import Logger
 from . import qr
 
 
