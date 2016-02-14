@@ -34,7 +34,7 @@ class TangentSpace(object):
         dmu = mu * alpha
         dfdmu = (func(x, mu+dmu) - func(x, mu)) / dmu
         J = newton.Jacobi(lambda y: func(y, mu), x, alpha=alpha)
-        self.H, self.V = krylov.arnoldi(J, dfdmu, eps=inner_tol)
+        self.H, self.V = krylov.arnoldi(J, -dfdmu, eps=inner_tol)
         g = krylov.solve_Hessenberg(self.H, krylov.norm(dfdmu))
         dxdmu = np.dot(self.V[:, :len(g)], g)
         v = np.concatenate((dxdmu, [1]))
@@ -64,7 +64,8 @@ def continuation(func, x, mu, delta):
     mu : float
         Initial parameter of continuation, and satisfies :math:`F(x, \mu) = 0`
     delta : float
-        step length of continuation
+        step length of continuation.
+        To decrease the parameter, you should set negative value.
 
     Yields
     -------
@@ -75,8 +76,9 @@ def continuation(func, x, mu, delta):
 
     """
     logger = Logger(__name__, "Continuation")
-    xi = np.concatenate((x, [mu]))
-    dxi = np.concatenate((np.zeros_like(x), [delta]))
+    concat = lambda x_, mu_: np.concatenate((x_, [mu_]))
+    xi = concat(x, mu)
+    dxi = concat(np.zeros_like(x), delta)
     for t in icount():
         logger.info({
             "count": t,
@@ -88,6 +90,6 @@ def continuation(func, x, mu, delta):
             dxi = -ts.tangent_vector
         else:
             dxi = ts.tangent_vector
-        xi0 = xi + delta * dxi
-        f = lambda z: np.concatenate(func(z[:-1], z[-1]), np.dot(z-xi0, dxi))
+        xi0 = xi + abs(delta) * dxi
+        f = lambda z: concat(func(z[:-1], z[-1]), np.dot(z-xi0, dxi))
         xi = newton.newton(f, xi)
