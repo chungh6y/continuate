@@ -1,93 +1,102 @@
 # -*- coding: utf-8 -*-
 
-from .newton import Jacobi
-
+from . import newton, krylov
+from .logger import Logger
 import numpy as np
-import scipy.optimize as opt
-import scipy.sparse as sp
-
-from logging import getLogger, DEBUG
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
+from itertools import count as icount
 
 
-def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
-    """
-    Tangent vector at (x, mu)
+class TangentSpace(object):
+    """ Tangent space at :math:`(x, \mu)`
 
-    Parameters
-    ----------
-    func: (numpy.array, float) -> numpy.array
-
-    x: numpy.array
-        the position where the tangent space is calculated
-    mu: float
-        the paramter where the tangent space is calculated
-    alpha: float
-        alpha for Jacobi
-    alpha_mu: float, optional
-        if None, alpha is used.
-
-    Returns
-    -------
-    (dx, dmu): (numpy.array, float)
-        normalized vector: :math:`dx^2 + dmu^2 = 1`
-
-    """
-    if alpha_mu is None:
-        alpha_mu = alpha
-    dfdmu = (func(x, mu + alpha_mu) - func(x, mu)) / alpha_mu
-    J = Jacobi(lambda y: func(y, mu), x, alpha=alpha)
-    dx, _ = sp.linalg.gmres(J, -dfdmu)
-    inv_norm = 1.0 / np.sqrt(np.dot(dx, dx) + 1)
-    return inv_norm * dx, inv_norm
-
-
-def continuate(func, x0, mu0, delta):
-    """
-    A generator for continuation
+    Attributes
+    -----------
+    H : numpy.array
+        Krylov-projected matrix of Jacobian :math:`DF(x, \mu)`
+    V : numpy.array
+        Basis yielded by Krylov subspace iteration,
+        i.e. satisfies :math:`DF(x, \mu)V = VH`.
+    tangent_vector : numpy.array
+        normalized tangent vector :math:`d\\xi = (dx, d\mu)`, where
+        :math:`dx/d\mu = -DF(x, \mu)^{-1}F(x, \mu)`.
+        The sign is chosen as :math:`d\mu > 0`.
 
     Parameters
     -----------
-    func: (numpy.array, float) -> numpy.array
-        The function which will be continuated
-    x0: numpy.array
-        Initial point of continuation. It must satisfy `func(x0, mu0) = 0`
-    mu0: float
-        Initial parameter of continuation. It must satisfy `func(x0, mu0) = 0`
-    delta: float
-        step length of continuation
-
-    Returns
-    --------
-    Genrator yielding (numpy.array, float)
-
-    Examples
-    ---------
-    >>> import numpy as np
-    >>> from itertools import islice
-    >>> f = lambda x, mu: np.array([x[1]**2 - mu, x[0]])
-    >>> x0 = np.array([1.0, 0.0])
-    >>> mu0 = 1.0
-    >>> G = continuate(f, x0, mu0, 1)
-    >>> result = []
-    >>> for x, m in islice(G, 10):
-    ...     result.append((x, m))
+    func : (numpy.array, float) -> numpy.array
+        :math:`F(x, \mu)`,
+        :code:`func(x, mu)` must have same dimension of :code:`x`
+    alpha : float, optional
+        relative inf small: :math:`d\mu = \\alpha \mu`
 
     """
-    pre_dx = None
-    while True:
-        dx, dmu = tangent_vector(func, x0, mu0)
-        # Keep continuation direction for overcoming turning points
-        if pre_dx is not None and np.dot(pre_dx, dx) < 0:
-            dx = -dx
-            dmu = -dmu
-        pre_dx = dx
-        mu = lambda x: mu0 + (delta - np.dot(x - x0, dx)) / dmu
-        F = lambda x: func(x, mu(x))
-        pre = x0 + delta * dx
-        x1 = opt.newton_krylov(F, pre, f_tol=1e-7)
-        logger.debug(np.linalg.norm(F(x1)))
-        mu0 = mu(x1)
-        x0 = x1
-        yield x0, mu0
+    def __init__(self, func, x, mu, alpha=1e-7, inner_tol=1e-9):
+        dmu = mu * alpha
+        dfdmu = (func(x, mu+dmu) - func(x, mu)) / dmu
+        J = newton.Jacobi(lambda y: func(y, mu), x, alpha=alpha)
+        self.H, self.V = krylov.arnoldi(J, -dfdmu, eps=inner_tol)
+        g = krylov.solve_Hessenberg(self.H, krylov.norm(dfdmu))
+        dxdmu = np.dot(self.V[:, :len(g)], g)
+        v = np.concatenate((dxdmu, [1]))
+        self.tangent_vector = v / krylov.norm(v)
+
+    def projected(self):
+        """ Krylov-projected matrix and basis
+
+        Returns
+        --------
+        (H, V)
+
+        """
+        return self.H, self.V
+
+
+def continuation(func, x, mu, delta, alpha=1e-7, ftol=1e-7, inner_tol=1e-9):
+    """ Generator for continuation of a vector function :math:`F(x, \mu)`
+
+    Parameters
+    -----------
+    func : (numpy.array, float) -> numpy.array
+        :math:`F(x, \mu)`
+        :code:`func(x, mu)` must have same dimension of :code:`x`
+    x : numpy.array
+        Initial point of continuation, and satisfies :math:`F(x, \mu) = 0`
+    mu : float
+        Initial parameter of continuation, and satisfies :math:`F(x, \mu) = 0`
+    delta : float
+        step length of continuation.
+        To decrease the parameter, you should set negative value.
+    alpha : float, optional
+        inf small of differentiation
+    ftol : float, optional
+        Stop criterion of Newton method
+    inner_tol : float, optional
+        Stop criterion of Krylov subspace generation
+
+    Yields
+    -------
+    x : numpy.array
+    mu : float
+    ts : TangentSpace
+        Tangent space at :math:`\\xi = (x, \mu)`
+
+    """
+    logger = Logger(__name__, "Continuation")
+    concat = lambda x_, mu_: np.concatenate((x_, [mu_]))
+    xi = concat(x, mu)
+    dxi = concat(np.zeros_like(x), delta)
+    for t in icount():
+        logger.info({
+            "count": t,
+            "mu": xi[-1],
+        })
+        ts = TangentSpace(func, xi[:-1], xi[-1],
+                          alpha=alpha, inner_tol=inner_tol)
+        yield xi[:-1], xi[-1], ts
+        if np.dot(dxi, ts.tangent_vector) < 0:
+            dxi = -ts.tangent_vector
+        else:
+            dxi = ts.tangent_vector
+        xi0 = xi + abs(delta) * dxi
+        f = lambda z: concat(func(z[:-1], z[-1]), np.dot(z-xi0, dxi))
+        xi = newton.newton(f, xi, ftol=ftol, inner_tol=inner_tol)
