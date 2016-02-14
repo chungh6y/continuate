@@ -51,7 +51,7 @@ class TangentSpace(object):
         return self.H, self.V
 
 
-def continuation(func, x, mu, delta):
+def continuation(func, x, mu, delta, alpha=1e-7, ftol=1e-7, inner_tol=1e-9):
     """ Generator for continuation of a vector function :math:`F(x, \mu)`
 
     Parameters
@@ -66,6 +66,12 @@ def continuation(func, x, mu, delta):
     delta : float
         step length of continuation.
         To decrease the parameter, you should set negative value.
+    alpha : float, optional
+        inf small of differentiation
+    ftol : float, optional
+        Stop criterion of Newton method
+    inner_tol : float, optional
+        Stop criterion of Krylov subspace generation
 
     Yields
     -------
@@ -84,7 +90,8 @@ def continuation(func, x, mu, delta):
             "count": t,
             "mu": xi[-1],
         })
-        ts = TangentSpace(func, xi[:-1], xi[-1])
+        ts = TangentSpace(func, xi[:-1], xi[-1],
+                          alpha=alpha, inner_tol=inner_tol)
         yield xi[:-1], xi[-1], ts
         if np.dot(dxi, ts.tangent_vector) < 0:
             dxi = -ts.tangent_vector
@@ -92,4 +99,4 @@ def continuation(func, x, mu, delta):
             dxi = ts.tangent_vector
         xi0 = xi + abs(delta) * dxi
         f = lambda z: concat(func(z[:-1], z[-1]), np.dot(z-xi0, dxi))
-        xi = newton.newton(f, xi)
+        xi = newton.newton(f, xi, ftol=ftol, inner_tol=inner_tol)
