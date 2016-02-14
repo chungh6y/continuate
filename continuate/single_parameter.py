@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from . import newton, krylov
+from .logger import Logger
 import numpy as np
+from itertools import count as icount
 
 
 class TangentSpace(object):
@@ -15,8 +17,9 @@ class TangentSpace(object):
         Basis yielded by Krylov subspace iteration,
         i.e. satisfies :math:`DF(x, \mu)V = VH`.
     tangent_vector : numpy.array
-        normalized tangent vector :math:`(dx, d\mu)`, where
+        normalized tangent vector :math:`d\\xi = (dx, d\mu)`, where
         :math:`dx/d\mu = -DF(x, \mu)^{-1}F(x, \mu)`.
+        The sign is chosen as :math:`d\mu > 0`.
 
     Parameters
     -----------
@@ -48,82 +51,43 @@ class TangentSpace(object):
         return self.H, self.V
 
 
-def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
-    """
-    Tangent vector at (x, mu)
-
-    Parameters
-    ----------
-    func: (numpy.array, float) -> numpy.array
-
-    x: numpy.array
-        the position where the tangent space is calculated
-    mu: float
-        the paramter where the tangent space is calculated
-    alpha: float
-        alpha for Jacobi
-    alpha_mu: float, optional
-        if None, alpha is used.
-
-    Returns
-    -------
-    (dx, dmu): (numpy.array, float)
-        normalized vector: :math:`dx^2 + dmu^2 = 1`
-
-    """
-    if alpha_mu is None:
-        alpha_mu = alpha
-    dfdmu = (func(x, mu + alpha_mu) - func(x, mu)) / alpha_mu
-    J = newton.Jacobi(lambda y: func(y, mu), x, alpha=alpha)
-    dx = krylov.gmres(J, -dfdmu)
-    inv_norm = 1.0 / np.sqrt(np.dot(dx, dx) + 1)
-    return inv_norm * dx, inv_norm
-
-
-def continuate(func, x0, mu0, delta):
-    """
-    A generator for continuation
+def continuation(func, x, mu, delta):
+    """ Generator for continuation of a vector function :math:`F(x, \mu)`
 
     Parameters
     -----------
-    func: (numpy.array, float) -> numpy.array
-        The function which will be continuated
-    x0: numpy.array
-        Initial point of continuation. It must satisfy `func(x0, mu0) = 0`
-    mu0: float
-        Initial parameter of continuation. It must satisfy `func(x0, mu0) = 0`
-    delta: float
+    func : (numpy.array, float) -> numpy.array
+        :math:`F(x, \mu)`
+        :code:`func(x, mu)` must have same dimension of :code:`x`
+    x : numpy.array
+        Initial point of continuation, and satisfies :math:`F(x, \mu) = 0`
+    mu : float
+        Initial parameter of continuation, and satisfies :math:`F(x, \mu) = 0`
+    delta : float
         step length of continuation
 
-    Returns
-    --------
-    Genrator yielding (numpy.array, float)
-
-    Examples
-    ---------
-    >>> import numpy as np
-    >>> from itertools import islice
-    >>> f = lambda x, mu: np.array([x[1]**2 - mu, x[0]])
-    >>> x0 = np.array([1.0, 0.0])
-    >>> mu0 = 1.0
-    >>> G = continuate(f, x0, mu0, 1)
-    >>> result = []
-    >>> for x, m in islice(G, 10):
-    ...     result.append((x, m))
+    Yields
+    -------
+    x : numpy.array
+    mu : float
+    ts : TangentSpace
+        Tangent space at :math:`\\xi = (x, \mu)`
 
     """
-    pre_dx = None
-    while True:
-        dx, dmu = tangent_vector(func, x0, mu0)
-        # Keep continuation direction for overcoming turning points
-        if pre_dx is not None and np.dot(pre_dx, dx) < 0:
-            dx = -dx
-            dmu = -dmu
-        pre_dx = dx
-        mu = lambda x: mu0 + (delta - np.dot(x - x0, dx)) / dmu
-        F = lambda x: func(x, mu(x))
-        pre = x0 + delta * dx
-        x1 = newton.newton(F, pre, ftol=1e-7)
-        mu0 = mu(x1)
-        x0 = x1
-        yield x0, mu0
+    logger = Logger(__name__, "Continuation")
+    xi = np.concatenate((x, [mu]))
+    dxi = np.concatenate((np.zeros_like(x), [delta]))
+    for t in icount():
+        logger.info({
+            "count": t,
+            "mu": xi[-1],
+        })
+        ts = TangentSpace(func, xi[:-1], xi[-1])
+        yield xi[:-1], xi[-1], ts
+        if np.dot(dxi, ts.tangent_vector) < 0:
+            dxi = -ts.tangent_vector
+        else:
+            dxi = ts.tangent_vector
+        xi0 = xi + delta * dxi
+        f = lambda z: np.concatenate(func(z[:-1], z[-1]), np.dot(z-xi0, dxi))
+        xi = newton.newton(f, xi)
