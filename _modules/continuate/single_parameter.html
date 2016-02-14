@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>continuate.single_parameter &mdash; continuate 0.1 documentation</title>
+    <title>continuate.single_parameter &mdash; continuate 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="continuate 0.1 documentation" href="../../index.html" />
+    <link rel="top" title="continuate 0.2.0 documentation" href="../../index.html" />
     <link rel="up" title="continuate" href="../continuate.html" /> 
   </head>
   <body role="document">
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.2.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
           <li class="nav-item nav-item-2"><a href="../continuate.html" accesskey="U">continuate</a> &raquo;</li> 
       </ul>
@@ -68,97 +68,106 @@
   <h1>Source code for continuate.single_parameter</h1><div class="highlight"><pre>
 <span class="c"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">.newton</span> <span class="kn">import</span> <span class="n">Jacobi</span>
-
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">newton</span><span class="p">,</span> <span class="n">krylov</span>
+<span class="kn">from</span> <span class="nn">.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy.optimize</span> <span class="kn">as</span> <span class="nn">opt</span>
-<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="kn">as</span> <span class="nn">sp</span>
-
-<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">DEBUG</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span> <span class="k">as</span> <span class="n">icount</span>
 
 
-<div class="viewcode-block" id="tangent_vector"><a class="viewcode-back" href="../../single_parameter.html#continuate.single_parameter.tangent_vector">[docs]</a><span class="k">def</span> <span class="nf">tangent_vector</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">alpha_mu</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Tangent vector at (x, mu)</span>
+<div class="viewcode-block" id="TangentSpace"><a class="viewcode-back" href="../../single_parameter.html#continuate.single_parameter.TangentSpace">[docs]</a><span class="k">class</span> <span class="nc">TangentSpace</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tangent space at :math:`(x, \mu)`</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    func: (numpy.array, float) -&gt; numpy.array</span>
-
-<span class="sd">    x: numpy.array</span>
-<span class="sd">        the position where the tangent space is calculated</span>
-<span class="sd">    mu: float</span>
-<span class="sd">        the paramter where the tangent space is calculated</span>
-<span class="sd">    alpha: float</span>
-<span class="sd">        alpha for Jacobi</span>
-<span class="sd">    alpha_mu: float, optional</span>
-<span class="sd">        if None, alpha is used.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    (dx, dmu): (numpy.array, float)</span>
-<span class="sd">        normalized vector: :math:`dx^2 + dmu^2 = 1`</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">alpha_mu</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">alpha_mu</span> <span class="o">=</span> <span class="n">alpha</span>
-    <span class="n">dfdmu</span> <span class="o">=</span> <span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">alpha_mu</span><span class="p">)</span> <span class="o">-</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">))</span> <span class="o">/</span> <span class="n">alpha_mu</span>
-    <span class="n">J</span> <span class="o">=</span> <span class="n">Jacobi</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">func</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">mu</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
-    <span class="n">dx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">gmres</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="o">-</span><span class="n">dfdmu</span><span class="p">)</span>
-    <span class="n">inv_norm</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">inv_norm</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span> <span class="n">inv_norm</span>
-
-</div>
-<div class="viewcode-block" id="continuate"><a class="viewcode-back" href="../../single_parameter.html#continuate.single_parameter.continuate">[docs]</a><span class="k">def</span> <span class="nf">continuate</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A generator for continuation</span>
+<span class="sd">    Attributes</span>
+<span class="sd">    -----------</span>
+<span class="sd">    H : numpy.array</span>
+<span class="sd">        Krylov-projected matrix of Jacobian :math:`DF(x, \mu)`</span>
+<span class="sd">    V : numpy.array</span>
+<span class="sd">        Basis yielded by Krylov subspace iteration,</span>
+<span class="sd">        i.e. satisfies :math:`DF(x, \mu)V = VH`.</span>
+<span class="sd">    tangent_vector : numpy.array</span>
+<span class="sd">        normalized tangent vector :math:`d\\xi = (dx, d\mu)`, where</span>
+<span class="sd">        :math:`dx/d\mu = -DF(x, \mu)^{-1}F(x, \mu)`.</span>
+<span class="sd">        The sign is chosen as :math:`d\mu &gt; 0`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
-<span class="sd">    func: (numpy.array, float) -&gt; numpy.array</span>
-<span class="sd">        The function which will be continuated</span>
-<span class="sd">    x0: numpy.array</span>
-<span class="sd">        Initial point of continuation. It must satisfy `func(x0, mu0) = 0`</span>
-<span class="sd">    mu0: float</span>
-<span class="sd">        Initial parameter of continuation. It must satisfy `func(x0, mu0) = 0`</span>
-<span class="sd">    delta: float</span>
-<span class="sd">        step length of continuation</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    --------</span>
-<span class="sd">    Genrator yielding (numpy.array, float)</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    ---------</span>
-<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; from itertools import islice</span>
-<span class="sd">    &gt;&gt;&gt; f = lambda x, mu: np.array([x[1]**2 - mu, x[0]])</span>
-<span class="sd">    &gt;&gt;&gt; x0 = np.array([1.0, 0.0])</span>
-<span class="sd">    &gt;&gt;&gt; mu0 = 1.0</span>
-<span class="sd">    &gt;&gt;&gt; G = continuate(f, x0, mu0, 1)</span>
-<span class="sd">    &gt;&gt;&gt; result = []</span>
-<span class="sd">    &gt;&gt;&gt; for x, m in islice(G, 10):</span>
-<span class="sd">    ...     result.append((x, m))</span>
+<span class="sd">    func : (numpy.array, float) -&gt; numpy.array</span>
+<span class="sd">        :math:`F(x, \mu)`,</span>
+<span class="sd">        :code:`func(x, mu)` must have same dimension of :code:`x`</span>
+<span class="sd">    alpha : float, optional</span>
+<span class="sd">        relative inf small: :math:`d\mu = \\alpha \mu`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">pre_dx</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">dx</span><span class="p">,</span> <span class="n">dmu</span> <span class="o">=</span> <span class="n">tangent_vector</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">mu0</span><span class="p">)</span>
-        <span class="c"># Keep continuation direction for overcoming turning points</span>
-        <span class="k">if</span> <span class="n">pre_dx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">pre_dx</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">dx</span> <span class="o">=</span> <span class="o">-</span><span class="n">dx</span>
-            <span class="n">dmu</span> <span class="o">=</span> <span class="o">-</span><span class="n">dmu</span>
-        <span class="n">pre_dx</span> <span class="o">=</span> <span class="n">dx</span>
-        <span class="n">mu</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mu0</span> <span class="o">+</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">/</span> <span class="n">dmu</span>
-        <span class="n">F</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-        <span class="n">pre</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">dx</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">newton_krylov</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">pre</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">F</span><span class="p">(</span><span class="n">x1</span><span class="p">)))</span>
-        <span class="n">mu0</span> <span class="o">=</span> <span class="n">mu</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
-        <span class="n">x0</span> <span class="o">=</span> <span class="n">x1</span>
-        <span class="k">yield</span> <span class="n">x0</span><span class="p">,</span> <span class="n">mu0</span></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
+        <span class="n">dmu</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">*</span> <span class="n">alpha</span>
+        <span class="n">dfdmu</span> <span class="o">=</span> <span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="o">+</span><span class="n">dmu</span><span class="p">)</span> <span class="o">-</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">))</span> <span class="o">/</span> <span class="n">dmu</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">newton</span><span class="o">.</span><span class="n">Jacobi</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">func</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">mu</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">krylov</span><span class="o">.</span><span class="n">arnoldi</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="o">-</span><span class="n">dfdmu</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">inner_tol</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">krylov</span><span class="o">.</span><span class="n">solve_Hessenberg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">krylov</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dfdmu</span><span class="p">))</span>
+        <span class="n">dxdmu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">[:,</span> <span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)],</span> <span class="n">g</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">dxdmu</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tangent_vector</span> <span class="o">=</span> <span class="n">v</span> <span class="o">/</span> <span class="n">krylov</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TangentSpace.projected"><a class="viewcode-back" href="../../single_parameter.html#continuate.single_parameter.TangentSpace.projected">[docs]</a>    <span class="k">def</span> <span class="nf">projected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Krylov-projected matrix and basis</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        (H, V)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span>
+
+</div></div>
+<div class="viewcode-block" id="continuation"><a class="viewcode-back" href="../../single_parameter.html#continuate.single_parameter.continuation">[docs]</a><span class="k">def</span> <span class="nf">continuation</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generator for continuation of a vector function :math:`F(x, \mu)`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    func : (numpy.array, float) -&gt; numpy.array</span>
+<span class="sd">        :math:`F(x, \mu)`</span>
+<span class="sd">        :code:`func(x, mu)` must have same dimension of :code:`x`</span>
+<span class="sd">    x : numpy.array</span>
+<span class="sd">        Initial point of continuation, and satisfies :math:`F(x, \mu) = 0`</span>
+<span class="sd">    mu : float</span>
+<span class="sd">        Initial parameter of continuation, and satisfies :math:`F(x, \mu) = 0`</span>
+<span class="sd">    delta : float</span>
+<span class="sd">        step length of continuation.</span>
+<span class="sd">        To decrease the parameter, you should set negative value.</span>
+<span class="sd">    alpha : float, optional</span>
+<span class="sd">        inf small of differentiation</span>
+<span class="sd">    ftol : float, optional</span>
+<span class="sd">        Stop criterion of Newton method</span>
+<span class="sd">    inner_tol : float, optional</span>
+<span class="sd">        Stop criterion of Krylov subspace generation</span>
+
+<span class="sd">    Yields</span>
+<span class="sd">    -------</span>
+<span class="sd">    x : numpy.array</span>
+<span class="sd">    mu : float</span>
+<span class="sd">    ts : TangentSpace</span>
+<span class="sd">        Tangent space at :math:`\\xi = (x, \mu)`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Continuation&quot;</span><span class="p">)</span>
+    <span class="n">concat</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x_</span><span class="p">,</span> <span class="n">mu_</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">x_</span><span class="p">,</span> <span class="p">[</span><span class="n">mu_</span><span class="p">]))</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+    <span class="n">dxi</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">delta</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">icount</span><span class="p">():</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">({</span>
+            <span class="s">&quot;count&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span>
+            <span class="s">&quot;mu&quot;</span><span class="p">:</span> <span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">})</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">TangentSpace</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">xi</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                          <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="n">inner_tol</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">xi</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ts</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dxi</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">dxi</span> <span class="o">=</span> <span class="o">-</span><span class="n">ts</span><span class="o">.</span><span class="n">tangent_vector</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dxi</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">tangent_vector</span>
+        <span class="n">xi0</span> <span class="o">=</span> <span class="n">xi</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">dxi</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">concat</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">z</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z</span><span class="o">-</span><span class="n">xi0</span><span class="p">,</span> <span class="n">dxi</span><span class="p">))</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="n">newton</span><span class="o">.</span><span class="n">newton</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="n">ftol</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="n">inner_tol</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -175,7 +184,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.2.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
           <li class="nav-item nav-item-2"><a href="../continuate.html" >continuate</a> &raquo;</li> 
       </ul>

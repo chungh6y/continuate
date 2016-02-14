@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>continuate.newton &mdash; continuate 0.1 documentation</title>
+    <title>continuate.newton &mdash; continuate 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="continuate 0.1 documentation" href="../../index.html" />
+    <link rel="top" title="continuate 0.2.0 documentation" href="../../index.html" />
     <link rel="up" title="continuate" href="../continuate.html" /> 
   </head>
   <body role="document">
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.2.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
           <li class="nav-item nav-item-2"><a href="../continuate.html" accesskey="U">continuate</a> &raquo;</li> 
       </ul>
@@ -71,7 +71,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.sparse.linalg</span> <span class="kn">as</span> <span class="nn">linalg</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span> <span class="k">as</span> <span class="n">icount</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">krylov</span>
 
 
@@ -229,7 +229,6 @@
 <span class="sd">    --------</span>
 <span class="sd">    (numpy.array, float)</span>
 <span class="sd">        argmin of xi, and nu (Lagrange multiplier)</span>
-<span class="sd">        CAUTION: nu may be not accurate</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
@@ -244,6 +243,9 @@
     <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">b</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
     <span class="n">AA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
     <span class="n">Ab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">AA</span><span class="p">,</span> <span class="n">Ab</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">xi</span><span class="p">,</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxiter</span><span class="p">):</span>
         <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">AA</span><span class="o">+</span><span class="n">nu</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">Ab</span><span class="p">)</span>
         <span class="n">xi_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
@@ -256,6 +258,9 @@
             <span class="k">return</span> <span class="n">xi</span><span class="p">,</span> <span class="n">nu</span>
         <span class="n">dPsi</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">AA</span><span class="o">+</span><span class="n">nu</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">xi</span><span class="p">))</span> <span class="o">/</span> <span class="n">xi_norm</span>
         <span class="n">nu</span> <span class="o">=</span> <span class="n">nu</span> <span class="o">-</span> <span class="p">(</span><span class="n">xi_norm</span><span class="o">*</span><span class="n">Psi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">r</span><span class="o">*</span><span class="n">dPsi</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nu</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Negative nu, reset to zero&quot;</span><span class="p">)</span>
+            <span class="n">nu</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">({</span>
             <span class="s">&quot;count&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span>
             <span class="s">&quot;Psi&quot;</span><span class="p">:</span> <span class="n">Psi</span><span class="p">,</span>
@@ -331,7 +336,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.2.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
           <li class="nav-item nav-item-2"><a href="../continuate.html" >continuate</a> &raquo;</li> 
       </ul>
