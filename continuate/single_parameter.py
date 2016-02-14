@@ -4,6 +4,49 @@ from . import newton, krylov
 import numpy as np
 
 
+class TangentSpace(object):
+    """ Tangent space at :math:`(x, \mu)`
+
+    Attributes
+    -----------
+    H : numpy.array
+        Krylov-projected matrix of Jacobian :math:`DF(x, \mu)`
+    V : numpy.array
+        Basis yielded by Krylov subspace iteration,
+        i.e. satisfies :math:`DF(x, \mu)V = VH`.
+    tangent_vector : numpy.array
+        normalized tangent vector :math:`(dx, d\mu)`, where
+        :math:`dx/d\mu = -DF(x, \mu)^{-1}F(x, \mu)`.
+
+    Parameters
+    -----------
+    func : (numpy.array, float) -> numpy.array
+        :math:`F(x, \mu)`,
+        :code:`func(x, mu)` must have same dimension of :code:`x`
+    alpha : float, optional
+        relative inf small: :math:`d\mu = \\alpha \mu`
+
+    """
+    def __init__(self, func, x, mu, alpha=1e-7, inner_tol=1e-9):
+        dmu = mu * alpha
+        dfdmu = (func(x, mu+dmu) - func(x, mu)) / dmu
+        J = newton.Jacobi(lambda y: func(y, mu), x, alpha=alpha)
+        self.H, self.V = krylov.arnoldi(J, dfdmu, eps=inner_tol)
+        g = krylov.solve_Hessenberg(self.H, krylov.norm(dfdmu))
+        dxdmu = np.dot(self.V[:, :len(g)], g)
+        v = np.concatenate((dxdmu, [1]))
+        self.tangent_vector = v / krylov.norm(v)
+
+    def projected(self):
+        """ Krylov-projected matrix and basis
+
+        Returns
+        --------
+        (H, V)
+
+        """
+        return self.H, self.V
+
 
 def tangent_vector(func, x, mu, alpha=1e-7, alpha_mu=None):
     """
