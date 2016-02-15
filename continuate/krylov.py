@@ -1,9 +1,29 @@
 # -*- coding: utf-8 -*-
+""" Krylov subspace methods
+
+Options
+--------
+krylov_tol : float
+    Tolerrance of Krylov iteration
+krylov_maxiter : float
+    Max iteration number of Krylov iteration
+
+Their default values are set in :py:data:`.default_options`
+"""
 
 import numpy as np
 from itertools import count as icount
 from .logger import Logger
 from . import qr
+
+default_options = {
+    "krylov_tol": 1e-9,
+    "krylov_maxiter": 1e+3,
+}
+""" default values of options
+
+You can get these values through :py:func:`continuate.get_default_options`
+"""
 
 
 def norm(v, dot=np.dot):
@@ -24,12 +44,12 @@ class Arnoldi(object):
 
     logger = Logger(__name__, "Arnoldi")
 
-    def __init__(self, A, b, eps=1e-6, dot=np.dot):
+    def __init__(self, A, b, krylov_tol, dot=np.dot, **opt):
         self.A = A
         self.dot = dot
-        self.ortho = qr.MGS(eps=eps, dot=dot)
+        self.ortho = qr.MGS(eps=krylov_tol, dot=dot)
         self.ortho(b)
-        self.eps = eps
+        self.eps = krylov_tol
         self.coefs = []
         self._calc()
 
@@ -74,8 +94,8 @@ class Arnoldi(object):
         return self.projected_matrix(), self.basis()
 
 
-def arnoldi(A, b, **kwds):
-    O = Arnoldi(A, b, **kwds)
+def arnoldi(A, b, **opt):
+    O = Arnoldi(A, b, **opt)
     return O()
 
 
@@ -98,7 +118,7 @@ def solve_Hessenberg(H, b):
     return Hg[:, N]
 
 
-def gmres(A, b, eps=1e-6, dot=np.dot):
-    H, V = arnoldi(A, b, eps=eps, dot=dot)
+def gmres(A, b, dot=np.dot, **opt):
+    H, V = arnoldi(A, b, dot=dot, **opt)
     g = solve_Hessenberg(H, norm(b, dot=dot))
     return dot(V[:, :len(g)], g)

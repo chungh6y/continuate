@@ -11,6 +11,7 @@ class TestKrylov(TestCase):
 
     def setUp(self):
         self.N = 5
+        self.opt = krylov.default_options
 
     def _random_linop(self):
         rand = np.random.rand(self.N, self.N)
@@ -33,7 +34,7 @@ class TestKrylov(TestCase):
         """
         A = self._random_linop()
         b = self._random_vector()
-        O = krylov.Arnoldi(A, b)
+        O = krylov.Arnoldi(A, b, **self.opt)
         H = O.projected_matrix()
         self.assertEqual(H.shape, (self.N, self.N))
 
@@ -44,7 +45,7 @@ class TestKrylov(TestCase):
         """
         A = linalg.aslinearoperator(np.identity(self.N))
         b = self._unit_vector(0)
-        O = krylov.Arnoldi(A, b)
+        O = krylov.Arnoldi(A, b, **self.opt)
         H = O.projected_matrix()
         self.assertEqual(H.shape, (1, 1))
         np.testing.assert_equal(H[0, 0], 1)
@@ -53,7 +54,7 @@ class TestKrylov(TestCase):
         """ Check orthogonality of the basis """
         A = self._random_linop()
         b = self._random_vector()
-        O = krylov.Arnoldi(A, b)
+        O = krylov.Arnoldi(A, b, **self.opt)
         V = O.basis()
         self.assertEqual(V.shape, (self.N, self.N))
         I = np.identity(self.N)
@@ -72,7 +73,7 @@ class TestKrylov(TestCase):
         """ Confirm AV = VH """
         A = self._random_linop()
         b = self._random_vector()
-        H, V = krylov.arnoldi(A, b)
+        H, V = krylov.arnoldi(A, b, **self.opt)
         np.testing.assert_almost_equal(A * V, np.dot(V, H))
 
     def _hessenberg_matrix(self):
@@ -90,7 +91,7 @@ class TestKrylov(TestCase):
         rand = self._hessenberg_matrix()
         A = linalg.aslinearoperator(rand)
         b = self._unit_vector(0)
-        H, V = krylov.arnoldi(A, b)
+        H, V = krylov.arnoldi(A, b, **self.opt)
         np.testing.assert_almost_equal(H, rand)
         np.testing.assert_almost_equal(V, np.identity(self.N))
 
@@ -105,5 +106,5 @@ class TestKrylov(TestCase):
         A = self._random_linop()
         x = self._random_vector()
         b = A * x
-        y = krylov.gmres(A, b)
+        y = krylov.gmres(A, b, **self.opt)
         np.testing.assert_almost_equal(y, x)

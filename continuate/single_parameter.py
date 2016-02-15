@@ -1,9 +1,22 @@
 # -*- coding: utf-8 -*-
 
+""" Single parameter numerical continuation
+
+Options
+--------
+tangentspace_dmu : float
+    Infinitesimal of parameter :math:`d\mu` for calculating :math:`dx/d\mu`
+
+"""
+
 from . import newton, krylov
 from .logger import Logger
 import numpy as np
 from itertools import count as icount
+
+default_options = {
+    "tangentspace_dmu": 1e-7,
+}
 
 
 class TangentSpace(object):
@@ -26,15 +39,13 @@ class TangentSpace(object):
     func : (numpy.array, float) -> numpy.array
         :math:`F(x, \mu)`,
         :code:`func(x, mu)` must have same dimension of :code:`x`
-    alpha : float, optional
-        relative inf small: :math:`d\mu = \\alpha \mu`
 
     """
-    def __init__(self, func, x, mu, alpha=1e-7, inner_tol=1e-9):
-        dmu = mu * alpha
+    def __init__(self, func, x, mu, tangentspace_dmu, **opt):
+        dmu = tangentspace_dmu
         dfdmu = (func(x, mu+dmu) - func(x, mu)) / dmu
-        J = newton.Jacobi(lambda y: func(y, mu), x, alpha=alpha)
-        self.H, self.V = krylov.arnoldi(J, -dfdmu, eps=inner_tol)
+        J = newton.Jacobi(lambda y: func(y, mu), x, **opt)
+        self.H, self.V = krylov.arnoldi(J, -dfdmu, **opt)
         g = krylov.solve_Hessenberg(self.H, krylov.norm(dfdmu))
         dxdmu = np.dot(self.V[:, :len(g)], g)
         v = np.concatenate((dxdmu, [1]))
@@ -51,7 +62,7 @@ class TangentSpace(object):
         return self.H, self.V
 
 
-def continuation(func, x, mu, delta, alpha=1e-7, ftol=1e-7, inner_tol=1e-9):
+def continuation(func, x, mu, delta, **opt):
     """ Generator for continuation of a vector function :math:`F(x, \mu)`
 
     Parameters
@@ -66,12 +77,6 @@ def continuation(func, x, mu, delta, alpha=1e-7, ftol=1e-7, inner_tol=1e-9):
     delta : float
         step length of continuation.
         To decrease the parameter, you should set negative value.
-    alpha : float, optional
-        inf small of differentiation
-    ftol : float, optional
-        Stop criterion of Newton method
-    inner_tol : float, optional
-        Stop criterion of Krylov subspace generation
 
     Yields
     -------
@@ -90,8 +95,7 @@ def continuation(func, x, mu, delta, alpha=1e-7, ftol=1e-7, inner_tol=1e-9):
             "count": t,
             "mu": xi[-1],
         })
-        ts = TangentSpace(func, xi[:-1], xi[-1],
-                          alpha=alpha, inner_tol=inner_tol)
+        ts = TangentSpace(func, xi[:-1], xi[-1], **opt)
         yield xi[:-1], xi[-1], ts
         if np.dot(dxi, ts.tangent_vector) < 0:
             dxi = -ts.tangent_vector
@@ -99,4 +103,4 @@ def continuation(func, x, mu, delta, alpha=1e-7, ftol=1e-7, inner_tol=1e-9):
             dxi = ts.tangent_vector
         xi0 = xi + abs(delta) * dxi
         f = lambda z: concat(func(z[:-1], z[-1]), np.dot(z-xi0, dxi))
-        xi = newton.newton(f, xi, ftol=ftol, inner_tol=inner_tol)
+        xi = newton.newton_krylov(f, xi, **opt)
