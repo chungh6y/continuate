@@ -5,7 +5,7 @@ from setuptools import setup
 
 
 setup(name="continuate",
-      version="0.2.0",
+      version="0.2.1",
       description="parameter continuation of continuous function",
       author="Toshiki Teramura",
       author_email="toshiki.teramura+continuate@gmail.com",
