@@ -58,14 +58,14 @@ class TestNewton(TestCase):
     def test_newton(self):
         """ Simple test for Newton method using polynominal function """
         x0 = np.array([0, 0])
-        x = newton.newton(f1, x0, **self.opt)
+        x = newton.newton_krylov(f1, x0, **self.opt)
         np.testing.assert_array_almost_equal(f1(x), np.zeros_like(x), decimal=5)
 
     def test_newton_noconvergent(self):
         """ non-convergent case for Newton method """
         x0 = np.array([3, 8])
         with self.assertRaises(RuntimeError):
-            newton.newton(f2, x0, **self.opt)
+            newton.newton_krylov(f2, x0, **self.opt)
 
     def test_hook_step(self):
         """ fuzzy test of hook step """

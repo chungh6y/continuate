@@ -132,7 +132,7 @@ class Hessian(object):
             r = r * np.sqrt(eps / e)
 
 
-def newton(func, x0, newton_tol, newton_maxiter, **opt):
+def newton_krylov(func, x0, newton_tol, newton_maxiter, **opt):
     """
     solve multi-dimensional equation :math:`F(x) = 0`
     using Newton-Krylov method.
