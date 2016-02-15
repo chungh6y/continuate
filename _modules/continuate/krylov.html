@@ -67,11 +67,31 @@
             
   <h1>Source code for continuate.krylov</h1><div class="highlight"><pre>
 <span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot; Krylov subspace methods</span>
+
+<span class="sd">Options</span>
+<span class="sd">--------</span>
+<span class="sd">krylov_tol : float</span>
+<span class="sd">    Tolerrance of Krylov iteration</span>
+<span class="sd">krylov_maxiter : float</span>
+<span class="sd">    Max iteration number of Krylov iteration</span>
+
+<span class="sd">Their default values are set in :py:data:`.default_options`</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span> <span class="k">as</span> <span class="n">icount</span>
 <span class="kn">from</span> <span class="nn">.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">qr</span>
+
+<span class="n">default_options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&quot;krylov_tol&quot;</span><span class="p">:</span> <span class="mf">1e-9</span><span class="p">,</span>
+    <span class="s">&quot;krylov_maxiter&quot;</span><span class="p">:</span> <span class="mf">1e+3</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot; default values of options</span>
+
+<span class="sd">You can get these values through :py:func:`continuate.get_default_options`</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="norm"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.norm">[docs]</a><span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">):</span>
@@ -92,12 +112,12 @@
 
     <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Arnoldi&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">krylov_tol</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dot</span> <span class="o">=</span> <span class="n">dot</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span> <span class="o">=</span> <span class="n">qr</span><span class="o">.</span><span class="n">MGS</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">dot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span> <span class="o">=</span> <span class="n">qr</span><span class="o">.</span><span class="n">MGS</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="n">krylov_tol</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">dot</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ortho</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">krylov_tol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coefs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_calc</span><span class="p">()</span>
 
@@ -142,8 +162,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_matrix</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">()</span>
 
 </div>
-<div class="viewcode-block" id="arnoldi"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.arnoldi">[docs]</a><span class="k">def</span> <span class="nf">arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="n">O</span> <span class="o">=</span> <span class="n">Arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+<div class="viewcode-block" id="arnoldi"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.arnoldi">[docs]</a><span class="k">def</span> <span class="nf">arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
+    <span class="n">O</span> <span class="o">=</span> <span class="n">Arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">O</span><span class="p">()</span>
 
 </div>
@@ -166,8 +186,8 @@
     <span class="k">return</span> <span class="n">Hg</span><span class="p">[:,</span> <span class="n">N</span><span class="p">]</span>
 
 </div>
-<div class="viewcode-block" id="gmres"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.gmres">[docs]</a><span class="k">def</span> <span class="nf">gmres</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">):</span>
-    <span class="n">H</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">dot</span><span class="p">)</span>
+<div class="viewcode-block" id="gmres"><a class="viewcode-back" href="../../krylov.html#continuate.krylov.gmres">[docs]</a><span class="k">def</span> <span class="nf">gmres</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">dot</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
     <span class="n">g</span> <span class="o">=</span> <span class="n">solve_Hessenberg</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">norm</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dot</span><span class="o">=</span><span class="n">dot</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">[:,</span> <span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)],</span> <span class="n">g</span><span class="p">)</span></div>
 </pre></div>

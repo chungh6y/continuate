@@ -41,6 +41,14 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">continuate.krylov</a><ul>
+<li><a class="reference internal" href="#options">Options</a></li>
+</ul>
+</li>
+</ul>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -71,9 +79,19 @@
             
   <div class="section" id="module-continuate.krylov">
 <span id="continuate-krylov"></span><h1>continuate.krylov<a class="headerlink" href="#module-continuate.krylov" title="Permalink to this headline">¶</a></h1>
+<p>Krylov subspace methods</p>
+<div class="section" id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>krylov_tol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Tolerrance of Krylov iteration</dd>
+<dt>krylov_maxiter <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Max iteration number of Krylov iteration</dd>
+</dl>
+<p>Their default values are set in <a class="reference internal" href="#continuate.krylov.default_options" title="continuate.krylov.default_options"><code class="xref py py-data docutils literal"><span class="pre">default_options</span></code></a></p>
 <dl class="class">
 <dt id="continuate.krylov.Arnoldi">
-<em class="property">class </em><code class="descclassname">continuate.krylov.</code><code class="descname">Arnoldi</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>eps=1e-06</em>, <em>dot=&lt;built-in function dot&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/krylov.html#Arnoldi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.krylov.Arnoldi" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">continuate.krylov.</code><code class="descname">Arnoldi</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>krylov_tol</em>, <em>dot=&lt;built-in function dot&gt;</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/krylov.html#Arnoldi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.krylov.Arnoldi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Construct Krylov subspace (Arnoldi process)</p>
 <p class="rubric">Attributes</p>
@@ -128,12 +146,19 @@
 
 <dl class="function">
 <dt id="continuate.krylov.arnoldi">
-<code class="descclassname">continuate.krylov.</code><code class="descname">arnoldi</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/krylov.html#arnoldi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.krylov.arnoldi" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">continuate.krylov.</code><code class="descname">arnoldi</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/krylov.html#arnoldi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.krylov.arnoldi" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="data">
+<dt id="continuate.krylov.default_options">
+<code class="descclassname">continuate.krylov.</code><code class="descname">default_options</code><em class="property"> = {'krylov_maxiter': 1000.0, 'krylov_tol': 1e-09}</em><a class="headerlink" href="#continuate.krylov.default_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>default values of options</p>
+<p>You can get these values through <a class="reference internal" href="continuate.html#continuate.get_default_options" title="continuate.get_default_options"><code class="xref py py-func docutils literal"><span class="pre">continuate.get_default_options()</span></code></a></p>
+</dd></dl>
 
 <dl class="function">
 <dt id="continuate.krylov.gmres">
-<code class="descclassname">continuate.krylov.</code><code class="descname">gmres</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>eps=1e-06</em>, <em>dot=&lt;built-in function dot&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/krylov.html#gmres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.krylov.gmres" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">continuate.krylov.</code><code class="descname">gmres</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>dot=&lt;built-in function dot&gt;</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/krylov.html#gmres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.krylov.gmres" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -146,6 +171,7 @@
 <code class="descclassname">continuate.krylov.</code><code class="descname">solve_Hessenberg</code><span class="sig-paren">(</span><em>H</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/krylov.html#solve_Hessenberg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.krylov.solve_Hessenberg" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</div>
 </div>
 
 

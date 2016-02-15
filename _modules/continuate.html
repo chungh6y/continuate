@@ -67,31 +67,33 @@
   <h1>Source code for continuate</h1><div class="highlight"><pre>
 <span class="c"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">op</span>
 <span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
-<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">DEBUG</span><span class="p">,</span> <span class="n">LoggerAdapter</span>
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 
-
-<span class="k">class</span> <span class="nc">Logger</span><span class="p">(</span><span class="n">LoggerAdapter</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">):</span>
-        <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">DEBUG</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Logger</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;algorithm&quot;</span><span class="p">:</span> <span class="n">algorithm_name</span><span class="p">})</span>
-
-    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">kwds</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;message&quot;</span><span class="p">:</span> <span class="n">msg</span><span class="p">}</span>
-        <span class="n">msg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">msg</span><span class="p">,</span> <span class="n">kwds</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&quot;*.py&quot;</span><span class="p">))</span>
-           <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">!=</span> <span class="s">&quot;__init__.py&quot;</span><span class="p">]</span>
+           <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">!=</span> <span class="s">&quot;__init__.py&quot;</span>
+           <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;test_&quot;</span><span class="p">)]</span>
 
-<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">__all__</span><span class="p">:</span>
-    <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&quot;continuate.&quot;</span> <span class="o">+</span> <span class="n">m</span><span class="p">)</span>
+<span class="n">_mods</span> <span class="o">=</span> <span class="p">[</span><span class="n">import_module</span><span class="p">(</span><span class="s">&quot;continuate.&quot;</span> <span class="o">+</span> <span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">__all__</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="get_default_options"><a class="viewcode-back" href="../continuate.html#continuate.get_default_options">[docs]</a><span class="k">def</span> <span class="nf">get_default_options</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; get default options as a dict</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ---------</span>
+<span class="sd">    &gt;&gt;&gt; get_default_options()</span>
+<span class="sd">    {&#39;krylov_maxiter&#39;: 1000.0, &#39;krylov_tol&#39;: 1e-09, &#39;newton_maxiter&#39;: 100, &#39;jacobi_alpha&#39;: 1e-07, &#39;newton_tol&#39;: 1e-07, &#39;hook_maxiter&#39;: 100, &#39;hook_tol&#39;: 0.1, &#39;trusted_region&#39;: 0.1}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_mods</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s">&quot;default_options&quot;</span><span class="p">):</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">default_options</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cfg</span></div>
 </pre></div>
 
           </div>

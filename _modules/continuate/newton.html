@@ -67,6 +67,25 @@
             
   <h1>Source code for continuate.newton</h1><div class="highlight"><pre>
 <span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot; Basic Newton methods using Krylov subspace method.</span>
+
+<span class="sd">Options</span>
+<span class="sd">--------</span>
+<span class="sd">newton_tol : float</span>
+<span class="sd">    Tolerrance of Newton step</span>
+<span class="sd">newton_maxiter : int</span>
+<span class="sd">    Max iteration number of Newton method</span>
+<span class="sd">jacobi_alpha : float</span>
+<span class="sd">    Infinitesimal for calculating Jacobian matrix</span>
+<span class="sd">trusted_region : float</span>
+<span class="sd">    Radius in model trusted region approach</span>
+<span class="sd">hook_maxiter : int</span>
+<span class="sd">    Max iteration number of hook step</span>
+<span class="sd">hook_tol : int</span>
+<span class="sd">    Relative tolerance of hook step iteration</span>
+
+<span class="sd">Their default values are set in :py:data:`.default_options`</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.sparse.linalg</span> <span class="kn">as</span> <span class="nn">linalg</span>
@@ -74,8 +93,21 @@
 <span class="kn">from</span> <span class="nn">.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">krylov</span>
 
+<span class="n">default_options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&quot;newton_tol&quot;</span><span class="p">:</span> <span class="mf">1e-7</span><span class="p">,</span>
+    <span class="s">&quot;newton_maxiter&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s">&quot;jacobi_alpha&quot;</span><span class="p">:</span> <span class="mf">1e-7</span><span class="p">,</span>
+    <span class="s">&quot;trusted_region&quot;</span><span class="p">:</span> <span class="mf">1e-1</span><span class="p">,</span>
+    <span class="s">&quot;hook_maxiter&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s">&quot;hook_tol&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot; default values of options</span>
 
-<div class="viewcode-block" id="Jacobi"><a class="viewcode-back" href="../../newton.html#continuate.newton.Jacobi">[docs]</a><span class="k">def</span> <span class="nf">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="sd">You can get these values through :py:func:`continuate.get_default_options`</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Jacobi"><a class="viewcode-back" href="../../newton.html#continuate.newton.Jacobi">[docs]</a><span class="k">def</span> <span class="nf">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">jacobi_alpha</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Jacobi oprator :math:`DF(x0)`, where</span>
 
@@ -84,13 +116,11 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    func: numpy.array -&gt; numpy.array</span>
+<span class="sd">    func : numpy.array -&gt; numpy.array</span>
 <span class="sd">        A function to be differentiated</span>
-<span class="sd">    x0: numpy.array</span>
+<span class="sd">    x0 : numpy.array</span>
 <span class="sd">        A position where the Jacobian is evaluated</span>
-<span class="sd">    alpha: float</span>
-
-<span class="sd">    fx: numpy.array, optional</span>
+<span class="sd">    fx : numpy.array, optional</span>
 <span class="sd">        func(x0)</span>
 
 <span class="sd">    Examples</span>
@@ -98,7 +128,7 @@
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">    &gt;&gt;&gt; f = lambda x: np.array([x[1]**2, x[0]**2])</span>
 <span class="sd">    &gt;&gt;&gt; x0 = np.array([1, 2])</span>
-<span class="sd">    &gt;&gt;&gt; J = Jacobi(f, x0)</span>
+<span class="sd">    &gt;&gt;&gt; J = Jacobi(f, x0, 1e-7)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -106,7 +136,7 @@
 
     <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">/</span> <span class="n">norm</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">jacobi_alpha</span> <span class="o">/</span> <span class="n">norm</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">x0</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span> <span class="o">-</span> <span class="n">fx</span><span class="p">)</span> <span class="o">/</span> <span class="n">r</span>
 
     <span class="k">return</span> <span class="n">linalg</span><span class="o">.</span><span class="n">LinearOperator</span><span class="p">(</span>
@@ -121,12 +151,12 @@
 
     <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Hessian&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">jacobi_alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fx0</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fx0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fx0</span><span class="p">,</span> <span class="n">jacobi_alpha</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">func</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">jacobi_alpha</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="n">fxv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">+</span> <span class="n">v</span><span class="p">)</span>
@@ -170,46 +200,52 @@
             <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eps</span> <span class="o">/</span> <span class="n">e</span><span class="p">)</span>
 
 </div></div>
-<div class="viewcode-block" id="newton"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton">[docs]</a><span class="k">def</span> <span class="nf">newton</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+<div class="viewcode-block" id="newton_krylov"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton_krylov">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">newton_tol</span><span class="p">,</span> <span class="n">newton_maxiter</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    solve multi-dimensional equation `F(x) = 0` using Newton-Krylov method.</span>
+<span class="sd">    solve multi-dimensional equation :math:`F(x) = 0`</span>
+<span class="sd">    using Newton-Krylov method.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
-<span class="sd">    func: numpy.array -&gt; numpy.array</span>
-<span class="sd">        `F`</span>
-<span class="sd">    x0: numpy.array</span>
+<span class="sd">    func : numpy.array -&gt; numpy.array</span>
+<span class="sd">        :math:`F` in the problem :math:`F(x) = 0`</span>
+<span class="sd">    x0 : numpy.array</span>
 <span class="sd">        initial guess of the solution</span>
-<span class="sd">    ftol: float, optional</span>
-<span class="sd">        tolerance of the iteration</span>
-<span class="sd">    maxiter: int, optional</span>
-<span class="sd">        maximum number of trial</span>
-<span class="sd">    inner_tol: float, optional</span>
-<span class="sd">        tolerance of linear solver (use scipy.sparse.linalg.gmres)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
-<span class="sd">    numpy.array</span>
-<span class="sd">        The solution `x` satisfies `F(x)=0`</span>
+<span class="sd">    x : numpy.array</span>
+<span class="sd">        The solution :math:`x` satisfies :math:`F(x)=0`</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ---------</span>
+<span class="sd">    &gt;&gt;&gt; import continuate</span>
+<span class="sd">    &gt;&gt;&gt; opt = continuate.get_default_options()</span>
+<span class="sd">    &gt;&gt;&gt; opt[&quot;newton_tol&quot;] = 1e-7</span>
+<span class="sd">    &gt;&gt;&gt; f = lambda x : (x-1)**2</span>
+<span class="sd">    &gt;&gt;&gt; x0 = np.array([1.1, 0.9])</span>
+<span class="sd">    &gt;&gt;&gt; x = newton_krylov(f, x0, **opt)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(f(x), np.zeros_like(x), atol=1e-7)</span>
+<span class="sd">    True</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Newton&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxiter</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">newton_maxiter</span><span class="p">):</span>
         <span class="n">fx</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">fx</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">({</span>
             <span class="s">&quot;count&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span>
             <span class="s">&quot;residual&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">,</span>
         <span class="p">})</span>
-        <span class="k">if</span> <span class="n">res</span> <span class="o">&lt;=</span> <span class="n">ftol</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="o">&lt;=</span> <span class="n">newton_tol</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">x0</span>
-        <span class="n">A</span> <span class="o">=</span> <span class="n">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="n">fx</span><span class="p">)</span>
-        <span class="n">dx</span> <span class="o">=</span> <span class="n">krylov</span><span class="o">.</span><span class="n">gmres</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="o">-</span><span class="n">fx</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">inner_tol</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="n">fx</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">krylov</span><span class="o">.</span><span class="n">gmres</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="o">-</span><span class="n">fx</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">dx</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not convergent (Newton)&quot;</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="hook_step"><a class="viewcode-back" href="../../newton.html#continuate.newton.hook_step">[docs]</a><span class="k">def</span> <span class="nf">hook_step</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">e</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<div class="viewcode-block" id="hook_step"><a class="viewcode-back" href="../../newton.html#continuate.newton.hook_step">[docs]</a><span class="k">def</span> <span class="nf">hook_step</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">trusted_region</span><span class="p">,</span> <span class="n">hook_maxiter</span><span class="p">,</span> <span class="n">hook_tol</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    optimal hook step based on trusted region approach</span>
 
@@ -218,17 +254,16 @@
 <span class="sd">    A : numpy.array</span>
 <span class="sd">        square matrix</span>
 <span class="sd">    b : numpy.array</span>
-<span class="sd">    r : float</span>
-<span class="sd">        trusted region</span>
+
 <span class="sd">    nu : float, optional (default=0.0)</span>
 <span class="sd">        initial value of Lagrange multiplier</span>
-<span class="sd">    e : float, optional (default=0.1)</span>
-<span class="sd">        relative tolerance of residue form r</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
-<span class="sd">    (numpy.array, float)</span>
-<span class="sd">        argmin of xi, and nu (Lagrange multiplier)</span>
+<span class="sd">    x : numpy.array</span>
+<span class="sd">        argmin of x</span>
+<span class="sd">    mu : float</span>
+<span class="sd">        Lagrange multiplier</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
@@ -239,6 +274,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Hook step&quot;</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">trusted_region</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">({</span><span class="s">&quot;nu0&quot;</span><span class="p">:</span> <span class="n">nu</span><span class="p">,</span> <span class="s">&quot;trusted_region&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span> <span class="p">})</span>
     <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">b</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
     <span class="n">AA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
@@ -246,7 +282,7 @@
     <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">AA</span><span class="p">,</span> <span class="n">Ab</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">xi</span><span class="p">,</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxiter</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">hook_maxiter</span><span class="p">):</span>
         <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">AA</span><span class="o">+</span><span class="n">nu</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">Ab</span><span class="p">)</span>
         <span class="n">xi_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
         <span class="n">Psi</span> <span class="o">=</span> <span class="n">xi_norm</span> <span class="o">-</span> <span class="n">r</span>
@@ -254,7 +290,7 @@
             <span class="s">&quot;count&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span>
             <span class="s">&quot;1-|xi|/r&quot;</span><span class="p">:</span> <span class="n">Psi</span> <span class="o">/</span> <span class="n">r</span><span class="p">,</span>
         <span class="p">})</span>
-        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Psi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">e</span> <span class="o">*</span> <span class="n">r</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Psi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">hook_tol</span> <span class="o">*</span> <span class="n">r</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">xi</span><span class="p">,</span> <span class="n">nu</span>
         <span class="n">dPsi</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">AA</span><span class="o">+</span><span class="n">nu</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">xi</span><span class="p">))</span> <span class="o">/</span> <span class="n">xi_norm</span>
         <span class="n">nu</span> <span class="o">=</span> <span class="n">nu</span> <span class="o">-</span> <span class="p">(</span><span class="n">xi_norm</span><span class="o">*</span><span class="n">Psi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">r</span><span class="o">*</span><span class="n">dPsi</span><span class="p">)</span>
@@ -270,18 +306,17 @@
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not convergent (hook-step)&quot;</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="newton_krylov_hook_gen"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton_krylov_hook_gen">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov_hook_gen</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="newton_krylov_hook_gen"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton_krylov_hook_gen">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov_hook_gen</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">trusted_region</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Generator of Newton-Krylov-hook iteration</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    -----------</span>
-<span class="sd">    r : float, optional(default=1e-2)</span>
-<span class="sd">        Initial guess of the radius of trusted region</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    --------</span>
-<span class="sd">    generator</span>
-<span class="sd">        yields `(x, |func(x)|, func(x))`</span>
+<span class="sd">    Yields</span>
+<span class="sd">    -------</span>
+<span class="sd">    x : numpy.array</span>
+<span class="sd">        :math:`x_n`</span>
+<span class="sd">    residual : float</span>
+<span class="sd">        :math:`|F(x_n)|`</span>
+<span class="sd">    fx : numpy.array</span>
+<span class="sd">        :math:`F(x_n)`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;NewtonKrylovHook&quot;</span><span class="p">)</span>
     <span class="n">nu</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -293,30 +328,55 @@
             <span class="s">&quot;residual&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">,</span>
         <span class="p">})</span>
         <span class="k">yield</span> <span class="n">x0</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">fx</span>
-        <span class="n">A</span> <span class="o">=</span> <span class="n">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="n">fx</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">Jacobi</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="n">fx</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
         <span class="n">b</span> <span class="o">=</span> <span class="o">-</span><span class="n">fx</span>
-        <span class="n">H</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">krylov</span><span class="o">.</span><span class="n">arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">inner_tol</span><span class="p">)</span>
+        <span class="n">H</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">krylov</span><span class="o">.</span><span class="n">arnoldi</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
         <span class="n">g</span> <span class="o">=</span> <span class="n">krylov</span><span class="o">.</span><span class="n">solve_Hessenberg</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">[:,</span> <span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)],</span> <span class="n">g</span><span class="p">)</span>
         <span class="n">dx_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">({</span><span class="s">&quot;|dx|&quot;</span><span class="p">:</span> <span class="n">dx_norm</span><span class="p">,</span> <span class="p">})</span>
-        <span class="k">if</span> <span class="n">dx_norm</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dx_norm</span> <span class="o">&lt;</span> <span class="n">trusted_region</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;in Trusted region&#39;</span><span class="p">)</span>
             <span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">dx</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;hook step&#39;</span><span class="p">)</span>
             <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">H</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">beta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-            <span class="n">xi</span><span class="p">,</span> <span class="n">nu</span> <span class="o">=</span> <span class="n">hook_step</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="n">nu</span><span class="p">)</span>
+            <span class="n">xi</span><span class="p">,</span> <span class="n">nu</span> <span class="o">=</span> <span class="n">hook_step</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">trusted_region</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="n">nu</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
             <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">[:,</span> <span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">xi</span><span class="p">)],</span> <span class="n">xi</span><span class="p">)</span>
             <span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">dx</span>
 
 </div>
-<div class="viewcode-block" id="newton_krylov_hook"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton_krylov_hook">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov_hook</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
-                       <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="n">gen</span> <span class="o">=</span> <span class="n">newton_krylov_hook_gen</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">inner_tol</span><span class="o">=</span><span class="n">inner_tol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+<div class="viewcode-block" id="newton_krylov_hook"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton_krylov_hook">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov_hook</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Solve multi-dimensional nonlinear equation :math:`F(x)=0`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    func : numpy.array -&gt; numpy.array</span>
+<span class="sd">        The function :math:`F` of the problem.</span>
+<span class="sd">    x0 : numpy.array</span>
+<span class="sd">        Initial guess of the solution</span>
+<span class="sd">    opt : dict</span>
+<span class="sd">        Options for calculation.</span>
+<span class="sd">        Please generate by :py:func:`continuate.get_default_options`</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ---------</span>
+<span class="sd">    &gt;&gt;&gt; import continuate</span>
+<span class="sd">    &gt;&gt;&gt; opt = continuate.get_default_options()</span>
+<span class="sd">    &gt;&gt;&gt; opt[&quot;newton_tol&quot;] = 1e-7</span>
+<span class="sd">    &gt;&gt;&gt; f = lambda x : (x-1)**2</span>
+<span class="sd">    &gt;&gt;&gt; x0 = np.array([1.1, 0.9])</span>
+<span class="sd">    &gt;&gt;&gt; x = newton_krylov_hook(f, x0, **opt)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(f(x), np.zeros_like(x), atol=1e-7)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">opt</span><span class="p">[</span><span class="s">&quot;newton_tol&quot;</span><span class="p">]</span>
+    <span class="n">maxiter</span> <span class="o">=</span> <span class="n">opt</span><span class="p">[</span><span class="s">&quot;newton_maxiter&quot;</span><span class="p">]</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">newton_krylov_hook_gen</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gen</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">res</span> <span class="o">&lt;</span> <span class="n">ftol</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">x</span>
         <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">maxiter</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not Convergent (Newton-Krylov-hook)&quot;</span><span class="p">)</span></div>
