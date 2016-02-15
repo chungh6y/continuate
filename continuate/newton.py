@@ -48,11 +48,11 @@ def Jacobi(func, x0, jacobi_alpha, fx=None, **opt):
 
     Parameters
     ----------
-    func: numpy.array -> numpy.array
+    func : numpy.array -> numpy.array
         A function to be differentiated
-    x0: numpy.array
+    x0 : numpy.array
         A position where the Jacobian is evaluated
-    fx: numpy.array, optional
+    fx : numpy.array, optional
         func(x0)
 
     Examples
@@ -139,15 +139,26 @@ def newton_krylov(func, x0, newton_tol, newton_maxiter, **opt):
 
     Parameters
     -----------
-    func: numpy.array -> numpy.array
-        `F`
-    x0: numpy.array
+    func : numpy.array -> numpy.array
+        :math:`F` in the problem :math:`F(x) = 0`
+    x0 : numpy.array
         initial guess of the solution
 
     Returns
     --------
     x : numpy.array
         The solution :math:`x` satisfies :math:`F(x)=0`
+
+    Examples
+    ---------
+    >>> import continuate
+    >>> opt = continuate.get_default_options()
+    >>> opt["newton_tol"] = 1e-7
+    >>> f = lambda x : (x-1)**2
+    >>> x0 = np.array([1.1, 0.9])
+    >>> x = newton_krylov(f, x0, **opt)
+    >>> np.allclose(f(x), np.zeros_like(x), atol=1e-7)
+    True
 
     """
     logger = Logger(__name__, "Newton")
@@ -175,17 +186,16 @@ def hook_step(A, b, trusted_region, hook_maxiter, hook_tol, nu=0, **opt):
     A : numpy.array
         square matrix
     b : numpy.array
-    r : float
-        trusted region
+
     nu : float, optional (default=0.0)
         initial value of Lagrange multiplier
-    e : float, optional (default=0.1)
-        relative tolerance of residue form r
 
     Returns
     --------
-    (numpy.array, float)
-        argmin of xi, and nu (Lagrange multiplier)
+    x : numpy.array
+        argmin of x
+    mu : float
+        Lagrange multiplier
 
     References
     ----------
@@ -281,6 +291,17 @@ def newton_krylov_hook(func, x0, **opt):
     opt : dict
         Options for calculation.
         Please generate by :py:func:`continuate.get_default_options`
+
+    Examples
+    ---------
+    >>> import continuate
+    >>> opt = continuate.get_default_options()
+    >>> opt["newton_tol"] = 1e-7
+    >>> f = lambda x : (x-1)**2
+    >>> x0 = np.array([1.1, 0.9])
+    >>> x = newton_krylov_hook(f, x0, **opt)
+    >>> np.allclose(f(x), np.zeros_like(x), atol=1e-7)
+    True
 
     """
     tol = opt["newton_tol"]
