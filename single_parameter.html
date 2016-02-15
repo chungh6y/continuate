@@ -41,6 +41,14 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">continuate.single_parameter</a><ul>
+<li><a class="reference internal" href="#options">Options</a></li>
+</ul>
+</li>
+</ul>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -71,9 +79,16 @@
             
   <div class="section" id="module-continuate.single_parameter">
 <span id="continuate-single-parameter"></span><h1>continuate.single_parameter<a class="headerlink" href="#module-continuate.single_parameter" title="Permalink to this headline">¶</a></h1>
+<p>Single parameter numerical continuation</p>
+<div class="section" id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>tangentspace_dmu <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Infinitesimal of parameter <span class="math">\(d\mu\)</span> for calculating <span class="math">\(dx/d\mu\)</span></dd>
+</dl>
 <dl class="class">
 <dt id="continuate.single_parameter.TangentSpace">
-<em class="property">class </em><code class="descclassname">continuate.single_parameter.</code><code class="descname">TangentSpace</code><span class="sig-paren">(</span><em>func</em>, <em>x</em>, <em>mu</em>, <em>alpha=1e-07</em>, <em>inner_tol=1e-09</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/single_parameter.html#TangentSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.single_parameter.TangentSpace" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">continuate.single_parameter.</code><code class="descname">TangentSpace</code><span class="sig-paren">(</span><em>func</em>, <em>x</em>, <em>mu</em>, <em>tangentspace_dmu</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/single_parameter.html#TangentSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.single_parameter.TangentSpace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Tangent space at <span class="math">\((x, \mu)\)</span></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -81,13 +96,9 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>func</strong> : (numpy.array, float) -&gt; numpy.array</p>
-<blockquote>
+<blockquote class="last">
 <div><p><span class="math">\(F(x, \mu)\)</span>,
 <code class="code docutils literal"><span class="pre">func(x,</span> <span class="pre">mu)</span></code> must have same dimension of <code class="code docutils literal"><span class="pre">x</span></code></p>
-</div></blockquote>
-<p><strong>alpha</strong> : float, optional</p>
-<blockquote class="last">
-<div><p>relative inf small: <span class="math">\(d\mu = \alpha \mu\)</span></p>
 </div></blockquote>
 </td>
 </tr>
@@ -141,7 +152,7 @@
 
 <dl class="function">
 <dt id="continuate.single_parameter.continuation">
-<code class="descclassname">continuate.single_parameter.</code><code class="descname">continuation</code><span class="sig-paren">(</span><em>func</em>, <em>x</em>, <em>mu</em>, <em>delta</em>, <em>alpha=1e-07</em>, <em>ftol=1e-07</em>, <em>inner_tol=1e-09</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/single_parameter.html#continuation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.single_parameter.continuation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">continuate.single_parameter.</code><code class="descname">continuation</code><span class="sig-paren">(</span><em>func</em>, <em>x</em>, <em>mu</em>, <em>delta</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/single_parameter.html#continuation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.single_parameter.continuation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator for continuation of a vector function <span class="math">\(F(x, \mu)\)</span></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -165,18 +176,6 @@
 <div><p>step length of continuation.
 To decrease the parameter, you should set negative value.</p>
 </div></blockquote>
-<p><strong>alpha</strong> : float, optional</p>
-<blockquote>
-<div><p>inf small of differentiation</p>
-</div></blockquote>
-<p><strong>ftol</strong> : float, optional</p>
-<blockquote>
-<div><p>Stop criterion of Newton method</p>
-</div></blockquote>
-<p><strong>inner_tol</strong> : float, optional</p>
-<blockquote>
-<div><p>Stop criterion of Krylov subspace generation</p>
-</div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy.array</p>
@@ -191,6 +190,7 @@ To decrease the parameter, you should set negative value.</p>
 </table>
 </dd></dl>
 
+</div>
 </div>
 
 
