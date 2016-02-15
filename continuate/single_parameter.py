@@ -103,4 +103,4 @@ def continuation(func, x, mu, delta, **opt):
             dxi = ts.tangent_vector
         xi0 = xi + abs(delta) * dxi
         f = lambda z: concat(func(z[:-1], z[-1]), np.dot(z-xi0, dxi))
-        xi = newton.newton(f, xi, **opt)
+        xi = newton.newton_krylov(f, xi, **opt)
