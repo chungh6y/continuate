@@ -52,8 +52,6 @@ def Jacobi(func, x0, jacobi_alpha, fx=None, **opt):
         A function to be differentiated
     x0: numpy.array
         A position where the Jacobian is evaluated
-    alpha: float
-
     fx: numpy.array, optional
         func(x0)
 
@@ -136,7 +134,8 @@ class Hessian(object):
 
 def newton(func, x0, newton_tol, newton_maxiter, **opt):
     """
-    solve multi-dimensional equation `F(x) = 0` using Newton-Krylov method.
+    solve multi-dimensional equation :math:`F(x) = 0`
+    using Newton-Krylov method.
 
     Parameters
     -----------
@@ -144,17 +143,11 @@ def newton(func, x0, newton_tol, newton_maxiter, **opt):
         `F`
     x0: numpy.array
         initial guess of the solution
-    ftol: float, optional
-        tolerance of the iteration
-    maxiter: int, optional
-        maximum number of trial
-    inner_tol: float, optional
-        tolerance of linear solver (use scipy.sparse.linalg.gmres)
 
     Returns
     --------
-    numpy.array
-        The solution `x` satisfies `F(x)=0`
+    x : numpy.array
+        The solution :math:`x` satisfies :math:`F(x)=0`
 
     """
     logger = Logger(__name__, "Newton")
@@ -238,15 +231,14 @@ def hook_step(A, b, trusted_region, hook_maxiter, hook_tol, nu=0, **opt):
 def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
     """ Generator of Newton-Krylov-hook iteration
 
-    Parameters
-    -----------
-    r : float, optional(default=1e-2)
-        Initial guess of the radius of trusted region
-
-    Returns
-    --------
-    generator
-        yields `(x, |func(x)|, func(x))`
+    Yields
+    -------
+    x : numpy.array
+        :math:`x_n`
+    residual : float
+        :math:`|F(x_n)|`
+    fx : numpy.array
+        :math:`F(x_n)`
     """
     logger = Logger(__name__, "NewtonKrylovHook")
     nu = 0.0
@@ -278,6 +270,19 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
 
 
 def newton_krylov_hook(func, x0, **opt):
+    """ Solve multi-dimensional nonlinear equation :math:`F(x)=0`
+
+    Parameters
+    -----------
+    func : numpy.array -> numpy.array
+        The function :math:`F` of the problem.
+    x0 : numpy.array
+        Initial guess of the solution
+    opt : dict
+        Options for calculation.
+        Please generate by :py:func:`continuate.get_default_options`
+
+    """
     tol = opt["newton_tol"]
     maxiter = opt["newton_maxiter"]
     gen = newton_krylov_hook_gen(func, x0, **opt)
