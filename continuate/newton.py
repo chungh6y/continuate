@@ -39,6 +39,29 @@ You can get these values through :py:func:`continuate.get_default_options`
 """
 
 
+def array_adapter(method):
+    def wrapper(func, x, *args, **kwds):
+        shape = x.shape
+        dtype = x.dtype
+        N = x.size
+
+        def convert(y):
+            y.reshape(N)
+            if dtype is np.complex:
+                y = np.concatenate((np.real(y), np.imag(y)))
+            return y
+
+        def revert(y):
+            if dtype is np.complex:
+                y = y[:len(y)/2] + 1j * y[len(y)/2:]
+            y.reshape(shape)
+            return y
+
+        f = lambda y: convert(func(revert(y)))
+        return revert(method(f, convert(x), *args, **kwds))
+    return wrapper
+
+
 def Jacobi(func, x0, jacobi_alpha, fx=None, **opt):
     """
     Jacobi oprator :math:`DF(x0)`, where
@@ -132,6 +155,7 @@ class Hessian(object):
             r = r * np.sqrt(eps / e)
 
 
+@array_adapter
 def newton_krylov(func, x0, newton_tol, newton_maxiter, **opt):
     """
     solve multi-dimensional equation :math:`F(x) = 0`
@@ -279,6 +303,7 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
             x0 = x0 + dx
 
 
+@array_adapter
 def newton_krylov_hook(func, x0, **opt):
     """ Solve multi-dimensional nonlinear equation :math:`F(x)=0`
 
