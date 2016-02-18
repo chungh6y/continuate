@@ -22,7 +22,7 @@ Their default values are set in :py:data:`.default_options`
 import numpy as np
 import scipy.sparse.linalg as linalg
 from itertools import count as icount
-from .logger import Logger
+from .misc import Logger, array_adapter
 from . import krylov
 
 default_options = {
@@ -37,29 +37,6 @@ default_options = {
 
 You can get these values through :py:func:`continuate.get_default_options`
 """
-
-
-def array_adapter(method):
-    def wrapper(func, x, *args, **kwds):
-        shape = x.shape
-        dtype = x.dtype
-        N = x.size
-
-        def convert(y):
-            y.reshape(N)
-            if dtype is np.complex:
-                y = np.concatenate((np.real(y), np.imag(y)))
-            return y
-
-        def revert(y):
-            if dtype is np.complex:
-                y = y[:len(y)/2] + 1j * y[len(y)/2:]
-            y.reshape(shape)
-            return y
-
-        f = lambda y: convert(func(revert(y)))
-        return revert(method(f, convert(x), *args, **kwds))
-    return wrapper
 
 
 def Jacobi(func, x0, jacobi_alpha, fx=None, **opt):
