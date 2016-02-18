@@ -162,7 +162,7 @@ def newton_krylov(func, x0, newton_tol, newton_maxiter, **opt):
 
     """
     logger = Logger(__name__, "Newton")
-    for t in range(newton_maxiter):
+    for t in range(int(newton_maxiter)):
         fx = func(x0)
         res = np.linalg.norm(fx)
         logger.info({
@@ -214,7 +214,7 @@ def hook_step(A, b, trusted_region, hook_maxiter, hook_tol, nu=0, **opt):
     xi = np.linalg.solve(AA, Ab)
     if np.linalg.norm(xi) < r:
         return xi, 0
-    for t in range(hook_maxiter):
+    for t in range(int(hook_maxiter)):
         xi = np.linalg.solve(AA+nu*I, Ab)
         xi_norm = np.linalg.norm(xi)
         Psi = xi_norm - r
