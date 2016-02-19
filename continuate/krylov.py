@@ -13,7 +13,7 @@ Their default values are set in :py:data:`.default_options`
 
 import numpy as np
 from itertools import count as icount
-from .logger import Logger
+from .misc import Logger
 from . import qr
 
 default_options = {

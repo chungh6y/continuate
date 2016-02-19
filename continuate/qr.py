@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .logger import Logger
+from .misc import Logger
 import numpy as np
 
 

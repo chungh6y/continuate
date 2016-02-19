@@ -10,7 +10,7 @@ tangentspace_dmu : float
 """
 
 from . import newton, krylov
-from .logger import Logger
+from .misc import Logger
 import numpy as np
 from itertools import count as icount
 
