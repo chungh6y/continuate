@@ -22,7 +22,7 @@ Their default values are set in :py:data:`.default_options`
 import numpy as np
 import scipy.sparse.linalg as linalg
 from itertools import count as icount
-from .logger import Logger
+from .misc import Logger, array_adapter
 from . import krylov
 
 default_options = {
@@ -132,6 +132,7 @@ class Hessian(object):
             r = r * np.sqrt(eps / e)
 
 
+@array_adapter
 def newton_krylov(func, x0, newton_tol, newton_maxiter, **opt):
     """
     solve multi-dimensional equation :math:`F(x) = 0`
@@ -238,6 +239,7 @@ def hook_step(A, b, trusted_region, hook_maxiter, hook_tol, nu=0, **opt):
     raise RuntimeError("Not convergent (hook-step)")
 
 
+@array_adapter
 def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
     """ Generator of Newton-Krylov-hook iteration
 
@@ -279,6 +281,7 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
             x0 = x0 + dx
 
 
+@array_adapter
 def newton_krylov_hook(func, x0, **opt):
     """ Solve multi-dimensional nonlinear equation :math:`F(x)=0`
 
