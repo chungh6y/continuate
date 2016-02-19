@@ -3,11 +3,11 @@
 """ Simple parameter continuation """
 
 from . import newton
-from .misc import Logger, array_adapter
+from .misc import Logger, array_adapter_p
 from itertools import count as icount
 
 
-@array_adapter
+@array_adapter_p
 def continuation(func, x, mu, delta, **opt):
     """
 

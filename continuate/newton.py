@@ -239,6 +239,7 @@ def hook_step(A, b, trusted_region, hook_maxiter, hook_tol, nu=0, **opt):
     raise RuntimeError("Not convergent (hook-step)")
 
 
+@array_adapter
 def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
     """ Generator of Newton-Krylov-hook iteration
 
