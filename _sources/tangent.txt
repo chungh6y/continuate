@@ -1,0 +1,7 @@
+continuate.tangent
+-------------------
+
+.. automodule:: continuate.tangent
+    :members:
+    :undoc-members:
+    :show-inheritance:

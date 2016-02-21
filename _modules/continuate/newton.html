@@ -90,7 +90,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.sparse.linalg</span> <span class="kn">as</span> <span class="nn">linalg</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span> <span class="k">as</span> <span class="n">icount</span>
-<span class="kn">from</span> <span class="nn">.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">.misc</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">array_adapter</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">krylov</span>
 
 <span class="n">default_options</span> <span class="o">=</span> <span class="p">{</span>
@@ -200,7 +200,8 @@
             <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eps</span> <span class="o">/</span> <span class="n">e</span><span class="p">)</span>
 
 </div></div>
-<div class="viewcode-block" id="newton_krylov"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton_krylov">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">newton_tol</span><span class="p">,</span> <span class="n">newton_maxiter</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
+<span class="nd">@array_adapter</span>
+<span class="k">def</span> <span class="nf">newton_krylov</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">newton_tol</span><span class="p">,</span> <span class="n">newton_maxiter</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    solve multi-dimensional equation :math:`F(x) = 0`</span>
 <span class="sd">    using Newton-Krylov method.</span>
@@ -230,7 +231,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Newton&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">newton_maxiter</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">newton_maxiter</span><span class="p">)):</span>
         <span class="n">fx</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">fx</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">({</span>
@@ -244,7 +245,7 @@
         <span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">dx</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not convergent (Newton)&quot;</span><span class="p">)</span>
 
-</div>
+
 <div class="viewcode-block" id="hook_step"><a class="viewcode-back" href="../../newton.html#continuate.newton.hook_step">[docs]</a><span class="k">def</span> <span class="nf">hook_step</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">trusted_region</span><span class="p">,</span> <span class="n">hook_maxiter</span><span class="p">,</span> <span class="n">hook_tol</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    optimal hook step based on trusted region approach</span>
@@ -282,7 +283,7 @@
     <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">AA</span><span class="p">,</span> <span class="n">Ab</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">xi</span><span class="p">,</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">hook_maxiter</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hook_maxiter</span><span class="p">)):</span>
         <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">AA</span><span class="o">+</span><span class="n">nu</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">Ab</span><span class="p">)</span>
         <span class="n">xi_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
         <span class="n">Psi</span> <span class="o">=</span> <span class="n">xi_norm</span> <span class="o">-</span> <span class="n">r</span>
@@ -306,7 +307,8 @@
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not convergent (hook-step)&quot;</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="newton_krylov_hook_gen"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton_krylov_hook_gen">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov_hook_gen</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">trusted_region</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
+<span class="nd">@array_adapter</span>
+<span class="k">def</span> <span class="nf">newton_krylov_hook_gen</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">trusted_region</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Generator of Newton-Krylov-hook iteration</span>
 
 <span class="sd">    Yields</span>
@@ -346,8 +348,9 @@
             <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">[:,</span> <span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">xi</span><span class="p">)],</span> <span class="n">xi</span><span class="p">)</span>
             <span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">dx</span>
 
-</div>
-<div class="viewcode-block" id="newton_krylov_hook"><a class="viewcode-back" href="../../newton.html#continuate.newton.newton_krylov_hook">[docs]</a><span class="k">def</span> <span class="nf">newton_krylov_hook</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
+
+<span class="nd">@array_adapter</span>
+<span class="k">def</span> <span class="nf">newton_krylov_hook</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Solve multi-dimensional nonlinear equation :math:`F(x)=0`</span>
 
 <span class="sd">    Parameters</span>
@@ -379,7 +382,7 @@
         <span class="k">if</span> <span class="n">res</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">x</span>
         <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">maxiter</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not Convergent (Newton-Krylov-hook)&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Not Convergent (Newton-Krylov-hook)&quot;</span><span class="p">)</span>
 </pre></div>
 
           </div>

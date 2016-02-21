@@ -127,7 +127,7 @@
 
 <dl class="attribute">
 <dt id="continuate.newton.Hessian.logger">
-<code class="descname">logger</code><em class="property"> = &lt;continuate.logger.Logger object&gt;</em><a class="headerlink" href="#continuate.newton.Hessian.logger" title="Permalink to this definition">¶</a></dt>
+<code class="descname">logger</code><em class="property"> = &lt;continuate.misc.Logger object&gt;</em><a class="headerlink" href="#continuate.newton.Hessian.logger" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -234,110 +234,6 @@ J. E. Dennis, Jr. and Robert B. Schnabel
 <a class="reference external" href="http://dx.doi.org/10.1137/1.9781611971200">http://dx.doi.org/10.1137/1.9781611971200</a>
 Chapter 6.4: THE MODEL-TRUST REGION APPROACH</li>
 </ul>
-</dd></dl>
-
-<dl class="function">
-<dt id="continuate.newton.newton_krylov">
-<code class="descclassname">continuate.newton.</code><code class="descname">newton_krylov</code><span class="sig-paren">(</span><em>func</em>, <em>x0</em>, <em>newton_tol</em>, <em>newton_maxiter</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/newton.html#newton_krylov"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.newton.newton_krylov" title="Permalink to this definition">¶</a></dt>
-<dd><p>solve multi-dimensional equation <span class="math">\(F(x) = 0\)</span>
-using Newton-Krylov method.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>func</strong> : numpy.array -&gt; numpy.array</p>
-<blockquote>
-<div><p><span class="math">\(F\)</span> in the problem <span class="math">\(F(x) = 0\)</span></p>
-</div></blockquote>
-<p><strong>x0</strong> : numpy.array</p>
-<blockquote>
-<div><p>initial guess of the solution</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy.array</p>
-<blockquote class="last">
-<div><p>The solution <span class="math">\(x\)</span> satisfies <span class="math">\(F(x)=0\)</span></p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">continuate</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">opt</span> <span class="o">=</span> <span class="n">continuate</span><span class="o">.</span><span class="n">get_default_options</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">opt</span><span class="p">[</span><span class="s">&quot;newton_tol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-7</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">newton_krylov</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="continuate.newton.newton_krylov_hook">
-<code class="descclassname">continuate.newton.</code><code class="descname">newton_krylov_hook</code><span class="sig-paren">(</span><em>func</em>, <em>x0</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/newton.html#newton_krylov_hook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.newton.newton_krylov_hook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Solve multi-dimensional nonlinear equation <span class="math">\(F(x)=0\)</span></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>func</strong> : numpy.array -&gt; numpy.array</p>
-<blockquote>
-<div><p>The function <span class="math">\(F\)</span> of the problem.</p>
-</div></blockquote>
-<p><strong>x0</strong> : numpy.array</p>
-<blockquote>
-<div><p>Initial guess of the solution</p>
-</div></blockquote>
-<p><strong>opt</strong> : dict</p>
-<blockquote class="last">
-<div><p>Options for calculation.
-Please generate by <a class="reference internal" href="continuate.html#continuate.get_default_options" title="continuate.get_default_options"><code class="xref py py-func docutils literal"><span class="pre">continuate.get_default_options()</span></code></a></p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">continuate</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">opt</span> <span class="o">=</span> <span class="n">continuate</span><span class="o">.</span><span class="n">get_default_options</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">opt</span><span class="p">[</span><span class="s">&quot;newton_tol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-7</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">newton_krylov_hook</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="continuate.newton.newton_krylov_hook_gen">
-<code class="descclassname">continuate.newton.</code><code class="descname">newton_krylov_hook_gen</code><span class="sig-paren">(</span><em>func</em>, <em>x0</em>, <em>trusted_region</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/newton.html#newton_krylov_hook_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.newton.newton_krylov_hook_gen" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generator of Newton-Krylov-hook iteration</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy.array</p>
-<blockquote>
-<div><p><span class="math">\(x_n\)</span></p>
-</div></blockquote>
-<p><strong>residual</strong> : float</p>
-<blockquote>
-<div><p><span class="math">\(|F(x_n)|\)</span></p>
-</div></blockquote>
-<p><strong>fx</strong> : numpy.array</p>
-<blockquote class="last">
-<div><p><span class="math">\(F(x_n)\)</span></p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 </div>

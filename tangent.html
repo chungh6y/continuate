@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>continuate.single_parameter &mdash; continuate 0.2.1 documentation</title>
+    <title>continuate.tangent &mdash; continuate 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -43,7 +43,7 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">continuate.single_parameter</a><ul>
+<li><a class="reference internal" href="#">continuate.tangent</a><ul>
 <li><a class="reference internal" href="#options">Options</a></li>
 </ul>
 </li>
@@ -52,7 +52,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/single_parameter.txt"
+      <li><a href="_sources/tangent.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -77,83 +77,26 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-continuate.single_parameter">
-<span id="continuate-single-parameter"></span><h1>continuate.single_parameter<a class="headerlink" href="#module-continuate.single_parameter" title="Permalink to this headline">¶</a></h1>
-<p>Single parameter numerical continuation</p>
+  <div class="section" id="module-continuate.tangent">
+<span id="continuate-tangent"></span><h1>continuate.tangent<a class="headerlink" href="#module-continuate.tangent" title="Permalink to this headline">¶</a></h1>
+<p>numerical continuation with tangent space</p>
 <div class="section" id="options">
 <h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt>tangentspace_dmu <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Infinitesimal of parameter <span class="math">\(d\mu\)</span> for calculating <span class="math">\(dx/d\mu\)</span></dd>
 </dl>
-<dl class="class">
-<dt id="continuate.single_parameter.TangentSpace">
-<em class="property">class </em><code class="descclassname">continuate.single_parameter.</code><code class="descname">TangentSpace</code><span class="sig-paren">(</span><em>func</em>, <em>x</em>, <em>mu</em>, <em>tangentspace_dmu</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/single_parameter.html#TangentSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.single_parameter.TangentSpace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Tangent space at <span class="math">\((x, \mu)\)</span></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>func</strong> : (numpy.array, float) -&gt; numpy.array</p>
-<blockquote class="last">
-<div><p><span class="math">\(F(x, \mu)\)</span>,
-<code class="code docutils literal"><span class="pre">func(x,</span> <span class="pre">mu)</span></code> must have same dimension of <code class="code docutils literal"><span class="pre">x</span></code></p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="8%" />
-<col width="92%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>H</td>
-<td>(numpy.array) Krylov-projected matrix of Jacobian <span class="math">\(DF(x, \mu)\)</span></td>
-</tr>
-<tr class="row-even"><td>V</td>
-<td>(numpy.array) Basis yielded by Krylov subspace iteration, i.e. satisfies <span class="math">\(DF(x, \mu)V = VH\)</span>.</td>
-</tr>
-<tr class="row-odd"><td>tangent_vector</td>
-<td>(numpy.array) normalized tangent vector <span class="math">\(d\xi = (dx, d\mu)\)</span>, where <span class="math">\(dx/d\mu = -DF(x, \mu)^{-1}F(x, \mu)\)</span>. The sign is chosen as <span class="math">\(d\mu &gt; 0\)</span>.</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#continuate.single_parameter.TangentSpace.projected" title="continuate.single_parameter.TangentSpace.projected"><code class="xref py py-obj docutils literal"><span class="pre">projected</span></code></a>()</td>
-<td>Krylov-projected matrix and basis</td>
-</tr>
-</tbody>
-</table>
-<dl class="method">
-<dt id="continuate.single_parameter.TangentSpace.projected">
-<code class="descname">projected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/single_parameter.html#TangentSpace.projected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.single_parameter.TangentSpace.projected" title="Permalink to this definition">¶</a></dt>
-<dd><p>Krylov-projected matrix and basis</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(H, V)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<dl class="function">
+<dt id="continuate.tangent.concat">
+<code class="descclassname">continuate.tangent.</code><code class="descname">concat</code><span class="sig-paren">(</span><em>x</em>, <em>mu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/tangent.html#concat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.tangent.concat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert <span class="math">\((x, \mu)\)</span> to <span class="math">\(\xi\)</span></p>
 </dd></dl>
 
 <dl class="function">
-<dt id="continuate.single_parameter.continuation">
-<code class="descclassname">continuate.single_parameter.</code><code class="descname">continuation</code><span class="sig-paren">(</span><em>func</em>, <em>x</em>, <em>mu</em>, <em>delta</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/single_parameter.html#continuation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.single_parameter.continuation" title="Permalink to this definition">¶</a></dt>
+<dt id="continuate.tangent.continuation">
+<code class="descclassname">continuate.tangent.</code><code class="descname">continuation</code><span class="sig-paren">(</span><em>func</em>, <em>x</em>, <em>mu</em>, <em>delta</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/tangent.html#continuation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.tangent.continuation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator for continuation of a vector function <span class="math">\(F(x, \mu)\)</span></p>
+<p>Using Newton-Krylov-Hook algorithm in each of continuation steps.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -179,10 +122,31 @@ To decrease the parameter, you should set negative value.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy.array</p>
-<p><strong>mu</strong> : float</p>
-<p><strong>ts</strong> : TangentSpace</p>
+<p class="last"><strong>mu</strong> : float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="continuate.tangent.tangent_vector">
+<code class="descclassname">continuate.tangent.</code><code class="descname">tangent_vector</code><span class="sig-paren">(</span><em>func</em>, <em>x</em>, <em>mu</em>, <em>tangent_dmu=1e-07</em>, <em>dxi=None</em>, <em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continuate/tangent.html#tangent_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#continuate.tangent.tangent_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get tangent vector at <span class="math">\((x, \mu)\)</span></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>func</strong> : (numpy.array, float) -&gt; numpy.array</p>
+<blockquote>
+<div><p><span class="math">\(F(x, \mu)\)</span>,
+<code class="code docutils literal"><span class="pre">func(x,</span> <span class="pre">mu)</span></code> must have same dimension of <code class="code docutils literal"><span class="pre">x</span></code></p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dxi</strong> : np.array</p>
 <blockquote class="last">
-<div><p>Tangent space at <span class="math">\(\xi = (x, \mu)\)</span></p>
+<div><p>Tangent vector</p>
 </div></blockquote>
 </td>
 </tr>
