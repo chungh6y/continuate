@@ -12,6 +12,8 @@ Their default values are set in :py:data:`.default_options`
 """
 
 import numpy as np
+from numpy import dot
+from numpy.linalg import norm
 from itertools import count as icount
 from .misc import Logger
 from . import qr
@@ -26,12 +28,11 @@ You can get these values through :py:func:`continuate.get_default_options`
 """
 
 
-def norm(v, dot=np.dot):
-    return np.sqrt(dot(v, v))
-
-
 class Arnoldi(object):
     """ Construct Krylov subspace (Arnoldi process)
+
+    .. math::
+        AV_n = V_n H_n + re^T
 
     Attributes
     -----------
@@ -44,10 +45,9 @@ class Arnoldi(object):
 
     logger = Logger(__name__, "Arnoldi")
 
-    def __init__(self, A, b, krylov_tol, dot=np.dot, **opt):
+    def __init__(self, A, b, krylov_tol, **opt):
         self.A = A
-        self.dot = dot
-        self.ortho = qr.MGS(eps=krylov_tol, dot=dot)
+        self.ortho = qr.MGS(eps=krylov_tol)
         self.ortho(b)
         self.eps = krylov_tol
         self.coefs = []
@@ -66,8 +66,7 @@ class Arnoldi(object):
         for c in icount():
             v = self.ortho[-1]
             Av = self.A * v
-            norm_Av = norm(Av, dot=self.dot)
-            self.matrix_norm = max(self.matrix_norm, norm_Av)
+            self.matrix_norm = max(self.matrix_norm, norm(Av))
             coef = self.ortho(Av)
             self.residual *= coef[-1]
             self.logger.info({
@@ -118,7 +117,7 @@ def solve_Hessenberg(H, b):
     return Hg[:, N]
 
 
-def gmres(A, b, dot=np.dot, **opt):
-    H, V = arnoldi(A, b, dot=dot, **opt)
-    g = solve_Hessenberg(H, norm(b, dot=dot))
+def gmres(A, b, **opt):
+    H, V = arnoldi(A, b, **opt)
+    g = solve_Hessenberg(H, norm(b))
     return dot(V[:, :len(g)], g)

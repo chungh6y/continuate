@@ -2,6 +2,8 @@
 
 from .misc import Logger
 import numpy as np
+from numpy import dot
+from numpy.linalg import norm
 
 
 class MGS(object):
@@ -29,9 +31,8 @@ class MGS(object):
 
     logger = Logger(__name__, "MGS")
 
-    def __init__(self, eps=1e-9, dot=np.dot):
+    def __init__(self, eps=1e-9):
         self.v = []
-        self.dot = dot
         self.e = eps
 
     def __iter__(self):
@@ -46,10 +47,10 @@ class MGS(object):
     def __call__(self, u):
         inner_prod = []
         for v in self.v:
-            uv = self.dot(u, v)
+            uv = dot(u, v)
             u -= uv * v
             inner_prod.append(uv)
-        u_norm = np.sqrt(self.dot(u, u))
+        u_norm = norm(u)
         inner_prod.append(u_norm)
         if u_norm > self.e:
             self.v.append(u / u_norm)
