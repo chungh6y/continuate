@@ -1,66 +1,89 @@
 # -*- coding: utf-8 -*-
 
-from .misc import Logger
 import numpy as np
-from numpy import dot
 from numpy.linalg import norm
+
+
+class OrthonalityError(RuntimeError):
+    pass
 
 
 class MGS(object):
     """ modified Gram-Schmit
 
+    Attributes
+    -----------
+    V : np.array(2d)
+        Basis of the generated linear space. :code:`V.shape` is :math:`(n, N)`,
+        where :math:`N` denote the dimension of the vector,
+        and :math:`n` denotes the step number.
+
+    Examples
+    ---------
     >>> mgs = MGS()
+    >>> for i in range(5):
+    ...     u = np.random.random(9)
+    ...     prod = mgs(u)
+    >>> len(mgs)
+    5
+    >>> mgs.V.shape
+    (5, 9)
+
     >>> for i in range(10):
     ...     u = np.random.random(9)
     ...     prod = mgs(u)
-    >>> len(mgs) == 9  # last insert does not add vector
-    True
-    >>> np.allclose(prod[-1], 0)
-    True
-    >>> ortho = []
-    >>> for i in range(len(mgs)):
-    ...     for j in range(i):
-    ...         ortho.append(np.dot(mgs[i], mgs[j]))
-    >>> np.allclose(ortho, np.zeros_like(ortho))
-    True
-    >>> norms = [np.linalg.norm(u) for u in mgs]
-    >>> np.allclose(norms, np.ones_like(norms))
-    True
+    >>> len(mgs)
+    9
+    >>> mgs.V.shape
+    (9, 9)
+
+    Raise :py:class:`OrthonalityError`
+    if a new dimension cannot be created with `append` method.
+
+    >>> mgs = MGS()
+    >>> for i in range(10):
+    ...     u = np.random.random(9)
+    ...     prod = mgs.append(u)
+    Traceback (most recent call last):
+        ...
+    continuate.qr.OrthonalityError: Linearly dependent
 
     """
-
-    logger = Logger(__name__, "MGS")
-
     def __init__(self, eps=1e-9):
-        self.v = []
+        self.V = None
         self.e = eps
 
     def __iter__(self):
-        return self.v.__iter__()
+        return self.V.__iter__()
 
     def __len__(self):
-        return len(self.v)
+        if self.V is None:
+            return 0
+        return len(self.V)
 
     def __getitem__(self, i):
-        return self.v[i]
+        if self.V is None:
+            raise RuntimeError("Basis is not initialized")
+        return self.V[i]
 
-    def __call__(self, u):
-        inner_prod = []
-        for v in self.v:
-            uv = dot(u, v)
-            u -= uv * v
-            inner_prod.append(uv)
-        u_norm = norm(u)
-        inner_prod.append(u_norm)
-        if u_norm > self.e:
-            self.v.append(u / u_norm)
-            self.logger.info({
-                "message": "Add new dimension",
-                "dimension": len(self.v),
-            })
-        else:
-            self.logger.info({
-                "message": "Linearly dependent",
-                "dimension": len(self.v),
-            })
-        return np.array(inner_prod)
+    def project(self, u):
+        uv = np.dot(self.V, u)
+        u -= np.dot(self.V.T, uv)
+        return uv, u
+
+    def append(self, u):
+        return self(u, strict_mode=True)
+
+    def __call__(self, u, strict_mode=False):
+        if self.V is None:
+            n_u = norm(u)
+            self.V = u / n_u
+            self.V = self.V.reshape((1, len(u)))
+            return np.array([n_u])
+        coef, res = self.project(u)
+        r = norm(res)
+        if r > self.e:
+            self.V = np.vstack((self.V, res/r))
+        elif strict_mode:
+            raise OrthonalityError("Linearly dependent")
+        return np.append(coef, r)
