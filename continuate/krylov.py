@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 """ Krylov subspace methods
 
+These methods are based on the Arnoldi process
+
+.. math:: AV_n = V_{n+1} H_{n+1},
+
+where :math:`V_n` denotes the basis of Krylov subspace,
+and :math:`H_n` denotes the projected matrix.
+
 Options
 --------
 krylov_tol : float
@@ -16,7 +23,7 @@ from numpy import dot
 from numpy.linalg import norm
 from itertools import count as icount
 from .misc import Logger
-from . import qr
+from . import qr, exceptions
 
 default_options = {
     "krylov_tol": 1e-9,
@@ -26,6 +33,35 @@ default_options = {
 
 You can get these values through :py:func:`continuate.get_default_options`
 """
+
+
+def arnoldi_common(A, r, krylov_tol=default_options["krylov_tol"],
+                   krylov_maxiter=default_options["krylov_maxiter"]):
+    """ Support generator for Arnoldi process
+
+    Parameters
+    -----------
+    A : Linear operator, np.matrix
+        :code:`*` operator is needed.
+    r : np.array
+        The base of Krylov subspace :math:`K = \\left<r, Ar, A^2r, ...\\right>`
+
+    Yields
+    -------
+    V : np.array (2d)
+        With shape :math:`(N, n)`
+    h : np.array (1d)
+        The last column of :math:`H_{n+1}`
+
+    """
+    mgs = qr.MGS(eps=krylov_tol)
+    mgs(r)
+    for n in range(krylov_maxiter):
+        v = mgs[-1]
+        Av = A*v
+        h = mgs(Av)
+        yield mgs.V.T, h
+    raise exceptions.MaxIteration("arnoldi_common")
 
 
 class Arnoldi(object):
