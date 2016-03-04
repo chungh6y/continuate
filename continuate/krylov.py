@@ -27,7 +27,7 @@ from . import qr, exceptions
 
 default_options = {
     "krylov_tol": 1e-9,
-    "krylov_maxiter": 1e+3,
+    "krylov_maxiter": 100,
 }
 """ default values of options
 
@@ -36,12 +36,12 @@ You can get these values through :py:func:`continuate.get_default_options`
 
 
 def arnoldi_common(A, r, krylov_tol=default_options["krylov_tol"],
-                   krylov_maxiter=default_options["krylov_maxiter"]):
+                   krylov_maxiter=default_options["krylov_maxiter"], **cfg):
     """ Support generator for Arnoldi process
 
     Parameters
     -----------
-    A : Linear operator, np.matrix
+    A : scipy.sparse.linalg.LinearOperator
         :code:`*` operator is needed.
     r : np.array
         The base of Krylov subspace :math:`K = \\left<r, Ar, A^2r, ...\\right>`
@@ -62,6 +62,60 @@ def arnoldi_common(A, r, krylov_tol=default_options["krylov_tol"],
         h = mgs(Av)
         yield mgs.V.T, h
     raise exceptions.MaxIteration("arnoldi_common")
+
+
+def gmres_gen(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
+              krylov_maxiter=default_options["krylov_maxiter"]):
+    """ Solve linear equations :math:`Ax=b` by GMRES
+
+    Parameters
+    -----------
+    A : scipy.sparse.linalg.LinearOperator
+        :code:`*` operator is needed.
+    b : np.array
+        inhomogeneous term
+    x0 : np.array
+        Initial guess of linear problem
+
+    Examples
+    ----------
+    >>> from numpy.random import random
+    >>> from scipy.sparse.linalg import aslinearoperator
+    >>> A = aslinearoperator(random((5, 5)))
+    >>> x = random(5)
+    >>> b = A*x
+    >>> ans = gmres_gen(A, b)
+    >>> np.allclose(ans, x)
+    True
+
+    """
+    logger = Logger(__name__, "GMRES")
+    if x0 is None:
+        r = b
+    else:
+        r = b - A*x0
+    G = arnoldi_common(A, r, krylov_tol=krylov_tol,
+                       krylov_maxiter=krylov_maxiter)
+    Q = []
+    hs = []
+    g = np.array([norm(r)])
+    for V, h in G:
+        g = np.append(g, 0)
+        for n, q in enumerate(Q):
+            h[n:n+2] = np.dot(q, h[n:n+2])
+        q = np.array([[h[-2], h[-1]], [-h[-1], h[-2]]]) / norm(h[-2:])
+        Q.append(q)
+        h[-2:] = np.dot(q, h[-2:])
+        g[-2:] = np.dot(q, g[-2:])
+        hs.append(h[:-1])
+        logger.info({"count": len(h)-2, "residual": np.abs(g[-1])})
+        if np.abs(g[-1]) < krylov_tol:
+            break
+    H = np.zeros((len(hs), len(hs)))
+    for n, h in enumerate(hs):
+        H[:n+1, n] = h
+    y = np.linalg.solve(H, g[:-1])
+    return np.dot(V, y)
 
 
 class Arnoldi(object):
