@@ -6,7 +6,7 @@ These methods are based on the Arnoldi process
 .. math:: AV_n = V_{n+1} H_{n+1},
 
 where :math:`V_n` denotes the basis of Krylov subspace,
-and :math:`H_n` denotes the projected matrix.
+and :math:`H_n` denotes the projected matrix with Hessenberg form.
 
 Options
 --------
@@ -62,9 +62,11 @@ def arnoldi_common(A, r, krylov_tol=default_options["krylov_tol"],
     raise exceptions.MaxIteration("arnoldi_common")
 
 
-def gmres(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
-          krylov_maxiter=default_options["krylov_maxiter"]):
-    """ Solve linear equations :math:`Ax=b` by GMRES
+def gmres_factorize(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
+                    krylov_maxiter=default_options["krylov_maxiter"], **cfg):
+    """
+    Execute a factorization :math:`AV = VQR`
+    to solve minimization problem :math:`|Ax-b| = |VQ(Ry-g)| = |Ry-g|`.
 
     Parameters
     -----------
@@ -75,16 +77,16 @@ def gmres(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
     x0 : np.array
         Initial guess of linear problem
 
-    Examples
-    ----------
-    >>> from numpy.random import random
-    >>> from scipy.sparse.linalg import aslinearoperator
-    >>> A = aslinearoperator(random((5, 5)))
-    >>> x = random(5)
-    >>> b = A*x
-    >>> ans = gmres(A, b)
-    >>> np.allclose(ans, x)
-    True
+    Returns
+    --------
+    V : np.array (2d)
+        The basis of Krylov subspace with shape :math:`(N, n)`
+    R : np.array (2d)
+        Projected, and QR-decomposed matrix :math:`AV = VQR`
+    g : np.array (1d)
+        Q-rotated vector of :math:`b`
+    Q : [np.array(2x2)]
+        Givens rotation matrix
 
     """
     logger = Logger(__name__, "GMRES")
@@ -112,5 +114,40 @@ def gmres(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
     H = np.zeros((len(hs), len(hs)))
     for n, h in enumerate(hs):
         H[:n+1, n] = h
-    y = np.linalg.solve(H, g[:-1])
+    return V, H, g[:-1], Q
+
+
+def gmres(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
+          krylov_maxiter=default_options["krylov_maxiter"], **cfg):
+    """ Solve linear equations :math:`Ax=b` by GMRES
+
+    Parameters
+    -----------
+    A : scipy.sparse.linalg.LinearOperator
+        :code:`*` operator is needed.
+    b : np.array
+        inhomogeneous term
+    x0 : np.array
+        Initial guess of linear problem
+
+    Returns
+    --------
+    x : np.array
+        The solution
+
+    Examples
+    ----------
+    >>> from numpy.random import random
+    >>> from scipy.sparse.linalg import aslinearoperator
+    >>> A = aslinearoperator(random((5, 5)))
+    >>> x = random(5)
+    >>> b = A*x
+    >>> ans = gmres(A, b)
+    >>> np.allclose(ans, x)
+    True
+
+    """
+    V, H, g, _ = gmres_factorize(A, b, x0, krylov_tol=krylov_tol,
+                                 krylov_maxiter=krylov_maxiter, **cfg)[0]
+    y = np.linalg.solve(H, g)
     return np.dot(V, y)
