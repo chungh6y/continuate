@@ -179,15 +179,18 @@ def newton_krylov(func, x0, newton_tol, newton_maxiter, **opt):
 
 
 def hook_step(A, b, trusted_region, hook_maxiter, hook_tol, nu=0, **opt):
-    """
-    optimal hook step based on trusted region approach
+    """ optimal hook step based on trusted region approach
+
+    Return :math:`x` which minimizes :math:`|Ax-b|`
+    under the constraint :math:`|x| < r`,
+    where :math:`r` denotes the radius of trusted region.
 
     Parameters
     ----------
-    A : numpy.array
-        square matrix
-    b : numpy.array
-
+    A : numpy.array (2d)
+        :math:`A`
+    b : numpy.array (1d)
+        :math:`b`
     nu : float, optional (default=0.0)
         initial value of Lagrange multiplier
 
@@ -264,9 +267,8 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
         yield x0, res, fx
         A = Jacobi(func, x0, fx=fx, **opt)
         b = -fx
-        H, V = krylov.arnoldi(A, b, **opt)
-        g = krylov.solve_Hessenberg(H, np.linalg.norm(b))
-        dx = np.dot(V[:, :len(g)], g)
+        V, R, g, _ = krylov.gmres_factorize(A, b, **opt)
+        dx = np.dot(V, np.linalg.solve(R, g))
         dx_norm = np.linalg.norm(dx)
         logger.info({"|dx|": dx_norm, })
         if dx_norm < trusted_region:
@@ -274,9 +276,7 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
             x0 = x0 + dx
         else:
             logger.info('hook step')
-            beta = np.zeros(H.shape[0])
-            beta[0] = np.linalg.norm(b)
-            xi, nu = hook_step(H, beta, trusted_region, nu=nu, **opt)
+            xi, nu = hook_step(R, g, trusted_region, nu=nu, **opt)
             dx = np.dot(V[:, :len(xi)], xi)
             x0 = x0 + dx
 

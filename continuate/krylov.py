@@ -88,6 +88,22 @@ def gmres_factorize(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
     Q : [np.array(2x2)]
         Givens rotation matrix
 
+    Examples
+    ----------
+    >>> from numpy.random import random
+    >>> from scipy.sparse.linalg import aslinearoperator
+
+    >>> A = aslinearoperator(random((5, 5)))
+    >>> b = random(5)
+    >>> V, R, g, Q = gmres_factorize(A, b)
+    >>> V.shape, R.shape, g.shape
+    ((5, 5), (5, 5), (5,))
+
+    >>> A = aslinearoperator(np.identity(5))
+    >>> V, R, g, Q = gmres_factorize(A, b)
+    >>> V.shape, R.shape, g.shape
+    ((5, 1), (1, 1), (1,))
+
     """
     logger = Logger(__name__, "GMRES")
     if x0 is None:
@@ -148,6 +164,6 @@ def gmres(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
 
     """
     V, H, g, _ = gmres_factorize(A, b, x0, krylov_tol=krylov_tol,
-                                 krylov_maxiter=krylov_maxiter, **cfg)[0]
+                                 krylov_maxiter=krylov_maxiter, **cfg)
     y = np.linalg.solve(H, g)
     return np.dot(V, y)
