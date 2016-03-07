@@ -169,4 +169,4 @@ def gmres(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
     V, H, g, _ = gmres_factorize(A, r, krylov_tol=krylov_tol,
                                  krylov_maxiter=krylov_maxiter, **cfg)
     y = np.linalg.solve(H, g)
-    return np.dot(V, y)
+    return np.dot(V[:, :len(y)], y)

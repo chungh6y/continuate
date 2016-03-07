@@ -24,8 +24,8 @@ class TestTangentSpace(TestCase):
         a /= np.linalg.norm(a)
         f = lambda x, mu: x - mu*a
         x0 = np.zeros_like(a)
-        dxi = arclength.tangent_vector(f, x0, 0, **self.opt)
-        dx = dxi[:-1]
+        dx, dmu = arclength.tangent_vector(f, x0, 0, **self.opt)
+        dxi = arclength.concat(dx, dmu)
         np.testing.assert_allclose(dx/np.linalg.norm(dx), a)
         np.testing.assert_almost_equal(np.linalg.norm(dxi), 1)
 
@@ -38,12 +38,12 @@ class TestTangentSpace(TestCase):
         a /= np.linalg.norm(a)
         f = lambda x, mu: x - mu*mu*a
 
-        dxi = arclength.tangent_vector(f, 4*a, 2, **self.opt)
-        dx = dxi[:-1]
+        dx, dmu = arclength.tangent_vector(f, 4*a, 2, **self.opt)
+        dxi = arclength.concat(dx, dmu)
         np.testing.assert_allclose(dx/np.linalg.norm(dx), a)
         np.testing.assert_almost_equal(np.linalg.norm(dxi), 1)
 
-        dxi = arclength.tangent_vector(f, self._zeros(), 0, **self.opt)
-        dx = dxi[:-1]
+        dx, dmu = arclength.tangent_vector(f, self._zeros(), 0, **self.opt)
+        dxi = arclength.concat(dx, dmu)
         np.testing.assert_allclose(dx, self._zeros(), atol=1e-7)
         np.testing.assert_almost_equal(np.linalg.norm(dxi), 1)
