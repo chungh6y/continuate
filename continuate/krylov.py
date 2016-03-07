@@ -21,7 +21,7 @@ Their default values are set in :py:data:`.default_options`
 import numpy as np
 from numpy.linalg import norm
 from .misc import Logger
-from . import qr, exceptions
+from . import qr
 
 default_options = {
     "krylov_tol": 1e-9,
@@ -33,8 +33,7 @@ You can get these values through :py:func:`continuate.get_default_options`
 """
 
 
-def arnoldi_common(A, r, krylov_tol=default_options["krylov_tol"],
-                   krylov_maxiter=default_options["krylov_maxiter"], **cfg):
+def arnoldi_common(A, r, krylov_tol=default_options["krylov_tol"], **cfg):
     """ Support generator for Arnoldi process
 
     Parameters
@@ -47,19 +46,22 @@ def arnoldi_common(A, r, krylov_tol=default_options["krylov_tol"],
     Yields
     -------
     V : np.array (2d)
-        With shape :math:`(N, n)`
+        With shape :math:`(N, n)` (`n` starts with `2`)
     h : np.array (1d)
-        The last column of :math:`H_{n+1}`
-
+        The last column of :math:`H_n` with shape `(n, )`
     """
-    mgs = qr.MGS(eps=krylov_tol)
-    mgs(r)
-    for n in range(krylov_maxiter):
-        v = mgs[-1]
-        Av = A*v
-        h = mgs(Av)
-        yield mgs.V.T, h
-    raise exceptions.MaxIteration("arnoldi_common")
+    K = [r]
+    G = qr.mgs(K, eps=krylov_tol)
+    for n, (V, h) in enumerate(G):
+        v = V[:, -1]
+        K.append(A*v)
+        if n == 0:
+            continue
+        if len(h) == n:
+            yield V, np.append(h, 0)
+            return
+        else:
+            yield V, h
 
 
 def gmres_factorize(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
@@ -110,8 +112,7 @@ def gmres_factorize(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
         r = b
     else:
         r = b - A*x0
-    G = arnoldi_common(A, r, krylov_tol=krylov_tol,
-                       krylov_maxiter=krylov_maxiter)
+    G = arnoldi_common(A, r, krylov_tol=krylov_tol)
     Q = []
     hs = []
     g = np.array([norm(r)])

@@ -268,7 +268,7 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
         A = Jacobi(func, x0, fx=fx, **opt)
         b = -fx
         V, R, g, _ = krylov.gmres_factorize(A, b, **opt)
-        dx = np.dot(V, np.linalg.solve(R, g))
+        dx = np.dot(V[:, :len(g)], np.linalg.solve(R, g))
         dx_norm = np.linalg.norm(dx)
         logger.info({"|dx|": dx_norm, })
         if dx_norm < trusted_region:
