@@ -10,7 +10,7 @@ from unittest import TestCase
 class TestKrylov(TestCase):
 
     def setUp(self):
-        self.N = 5
+        self.N = 100
         self.opt = krylov.default_options
 
     def _random_linop(self):
