@@ -20,6 +20,7 @@ Their default values are set in :py:data:`.default_options`
 """
 
 import numpy as np
+from numpy.linalg import norm
 import scipy.sparse.linalg as linalg
 from itertools import count as icount
 from .misc import Logger, array_adapter
@@ -259,7 +260,7 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
     nu = 0.0
     for t in icount():
         fx = func(x0)
-        res = np.linalg.norm(fx)
+        res = norm(fx)
         logger.info({
             "count": t,
             "residual": res,
@@ -267,9 +268,10 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
         yield x0, res, fx
         A = Jacobi(func, x0, fx=fx, **opt)
         b = -fx
-        V, R, g, _ = krylov.gmres_factorize(A, b, **opt)
+        opt["krylov_tol"] = 0.1 * norm(b)
+        V, R, g, Q = krylov.gmres_factorize(A, b, **opt)
         dx = np.dot(V[:, :len(g)], np.linalg.solve(R, g))
-        dx_norm = np.linalg.norm(dx)
+        dx_norm = norm(dx)
         logger.info({"|dx|": dx_norm, })
         if dx_norm < trusted_region:
             logger.info('in Trusted region')

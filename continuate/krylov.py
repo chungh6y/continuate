@@ -64,7 +64,7 @@ def arnoldi_common(A, r, krylov_tol=default_options["krylov_tol"], **cfg):
             yield V, h
 
 
-def gmres_factorize(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
+def gmres_factorize(A, r, krylov_tol=default_options["krylov_tol"],
                     krylov_maxiter=default_options["krylov_maxiter"], **cfg):
     """
     Execute a factorization :math:`AV = VQR`
@@ -108,10 +108,6 @@ def gmres_factorize(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
 
     """
     logger = Logger(__name__, "GMRES")
-    if x0 is None:
-        r = b
-    else:
-        r = b - A*x0
     G = arnoldi_common(A, r, krylov_tol=krylov_tol)
     Q = []
     hs = []
@@ -164,7 +160,13 @@ def gmres(A, b, x0=None, krylov_tol=default_options["krylov_tol"],
     True
 
     """
-    V, H, g, _ = gmres_factorize(A, b, x0, krylov_tol=krylov_tol,
+    if x0 is None:
+        r = b
+    else:
+        r = b - A*x0
+    if norm(r) < krylov_tol:
+        return (x0 if x0 is not None else np.zeros_like(r))
+    V, H, g, _ = gmres_factorize(A, r, krylov_tol=krylov_tol,
                                  krylov_maxiter=krylov_maxiter, **cfg)
     y = np.linalg.solve(H, g)
     return np.dot(V, y)
