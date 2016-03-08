@@ -272,12 +272,11 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
         V, R, g, Q = krylov.gmres_factorize(A, b, **opt)
         dx = np.dot(V[:, :len(g)], np.linalg.solve(R, g))
         dx_norm = norm(dx)
-        logger.info({"|dx|": dx_norm, })
         if dx_norm < trusted_region:
-            logger.info('in Trusted region')
+            logger.info({"|dx|": dx_norm, "message": 'in Trusted region'})
             x0 = x0 + dx
         else:
-            logger.info('hook step')
+            logger.info({"|dx|": dx_norm, "message": 'Hook step'})
             xi, nu = hook_step(R, g, trusted_region, nu=nu, **opt)
             dx = np.dot(V[:, :len(xi)], xi)
             x0 = x0 + dx
