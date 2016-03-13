@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>continuate.misc &mdash; continuate 0.2.1 documentation</title>
+    <title>continuate.misc &mdash; continuate 0.2.2 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.2.1',
+        VERSION:     '0.2.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="continuate 0.2.1 documentation" href="index.html" /> 
+    <link rel="top" title="continuate 0.2.2 documentation" href="index.html" />
+    <link rel="prev" title="continuate.arclength" href="arclength.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -36,11 +37,17 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">continuate 0.2.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="arclength.html" title="continuate.arclength"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">continuate 0.2.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="arclength.html"
+                        title="previous chapter">continuate.arclength</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -140,44 +147,8 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">critical</span></code>(msg,&nbsp;*args,&nbsp;**kwargs)</td>
-<td>Delegate a critical call to the underlying logger.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">debug</span></code>(msg,&nbsp;*args,&nbsp;**kwargs)</td>
-<td>Delegate a debug call to the underlying logger.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">error</span></code>(msg,&nbsp;*args,&nbsp;**kwargs)</td>
-<td>Delegate an error call to the underlying logger.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">exception</span></code>(msg,&nbsp;*args[,&nbsp;exc_info])</td>
-<td>Delegate an exception call to the underlying logger.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">getEffectiveLevel</span></code>()</td>
-<td>Get the effective level for the underlying logger.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">hasHandlers</span></code>()</td>
-<td>See if the underlying logger has any handlers.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">info</span></code>(msg,&nbsp;*args,&nbsp;**kwargs)</td>
-<td>Delegate an info call to the underlying logger.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">isEnabledFor</span></code>(level)</td>
-<td>Is this logger enabled for level &#8216;level&#8217;?</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">log</span></code>(level,&nbsp;msg,&nbsp;*args,&nbsp;**kwargs)</td>
-<td>Delegate a log call to the underlying logger, after adding contextual information from this adapter instance.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#continuate.misc.Logger.process" title="continuate.misc.Logger.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(msg,&nbsp;kwds)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#continuate.misc.Logger.process" title="continuate.misc.Logger.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(msg,&nbsp;kwds)</td>
 <td></td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">setLevel</span></code>(level)</td>
-<td>Set the specified level on the underlying logger.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">warn</span></code>(msg,&nbsp;*args,&nbsp;**kwargs)</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">warning</span></code>(msg,&nbsp;*args,&nbsp;**kwargs)</td>
-<td>Delegate a warning call to the underlying logger.</td>
 </tr>
 </tbody>
 </table>
@@ -215,12 +186,15 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">continuate 0.2.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="arclength.html" title="continuate.arclength"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">continuate 0.2.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Toshiki Teramura.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

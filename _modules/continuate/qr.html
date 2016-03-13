@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>continuate.qr &mdash; continuate 0.2.1 documentation</title>
+    <title>continuate.qr &mdash; continuate 0.2.2 documentation</title>
     
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.2.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="continuate 0.2.1 documentation" href="../../index.html" />
+    <link rel="top" title="continuate 0.2.2 documentation" href="../../index.html" />
     <link rel="up" title="continuate" href="../continuate.html" /> 
   </head>
   <body role="document">
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.2.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.2.2 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
           <li class="nav-item nav-item-2"><a href="../continuate.html" accesskey="U">continuate</a> &raquo;</li> 
       </ul>
@@ -66,10 +66,11 @@
           <div class="body" role="main">
             
   <h1>Source code for continuate.qr</h1><div class="highlight"><pre>
-<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">.misc</span> <span class="kn">import</span> <span class="n">Logger</span>
 
 
 <div class="viewcode-block" id="mgs"><a class="viewcode-back" href="../../qr.html#continuate.qr.mgs">[docs]</a><span class="k">def</span> <span class="nf">mgs</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
@@ -86,13 +87,16 @@
 <span class="sd">    &gt;&gt;&gt; qr = [np.dot(Q, r) for Q, r in mgs(vecs)]</span>
 <span class="sd">    &gt;&gt;&gt; np.testing.assert_allclose(qr, vecs)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;MGS&quot;</span><span class="p">)</span>
     <span class="n">Q</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">:</span>
+        <span class="n">nv0</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">Q</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
         <span class="n">Qv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">v</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Qv</span><span class="p">)</span>
         <span class="n">nv</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">({</span><span class="s">&quot;residual&quot;</span><span class="p">:</span> <span class="n">nv</span> <span class="o">/</span> <span class="n">nv0</span><span class="p">,</span> <span class="s">&quot;dimension&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">Qv</span><span class="p">)})</span>
         <span class="k">if</span> <span class="n">nv</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">:</span>
             <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">Q</span><span class="p">,</span> <span class="n">v</span><span class="o">/</span><span class="n">nv</span><span class="p">))</span>
             <span class="k">yield</span> <span class="n">Q</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Qv</span><span class="p">,</span> <span class="n">nv</span><span class="p">)</span>
@@ -114,14 +118,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.2.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">continuate 0.2.2 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
           <li class="nav-item nav-item-2"><a href="../continuate.html" >continuate</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Toshiki Teramura.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>
