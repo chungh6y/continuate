@@ -1,25 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Basic Newton methods using Krylov subspace method.
-
-Options
---------
-newton_tol : float
-    Tolerrance of Newton step
-newton_krylov_tol_ratio : float
-    relative tolerrance of Krylov method (GMRES)
-newton_maxiter : int
-    Max iteration number of Newton method
-jacobi_alpha : float
-    Infinitesimal for calculating Jacobian matrix
-trusted_region : float
-    Radius in model trusted region approach
-hook_maxiter : int
-    Max iteration number of hook step
-hook_tol : int
-    Relative tolerance of hook step iteration
-
-Their default values are set in :py:data:`.default_options`
-"""
+""" Basic Newton methods using Krylov subspace method. """
 
 import numpy as np
 from numpy.linalg import norm
@@ -40,6 +20,24 @@ default_options = {
 """ default values of options
 
 You can get these values through :py:func:`continuate.get_default_options`
+
+Parameters
+------------
+newton_tol : float
+    Tolerrance of Newton step
+newton_krylov_tol_ratio : float
+    relative tolerrance of Krylov method (GMRES)
+newton_maxiter : int
+    Max iteration number of Newton method
+jacobi_alpha : float
+    Infinitesimal for calculating Jacobian matrix
+trusted_region : float
+    Radius in model trusted region approach
+hook_maxiter : int
+    Max iteration number of hook step
+hook_tol : int
+    Relative tolerance of hook step iteration
+
 """
 
 
@@ -113,8 +111,8 @@ class Hessian(object):
         p : float, optional (default=2)
             Iteration will end if the deviation is in `[eps/p, eps*p]`.
 
-        Return
-        -------
+        Returns
+        --------
         r : float
             radius of the trusted region
 

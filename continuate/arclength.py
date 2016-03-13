@@ -2,11 +2,6 @@
 
 """ numerical continuation with tangent space
 
-Options
---------
-tangentspace_dmu : float
-    Infinitesimal of parameter :math:`d\mu` for calculating :math:`dx/d\mu`
-
 """
 
 from . import newton, krylov
@@ -17,6 +12,15 @@ from itertools import count as icount
 default_options = {
     "tangent_dmu": 1e-7,
 }
+""" default values of options
+
+You can get these values through :py:func:`continuate.get_default_options`
+
+Parameters
+-----------
+tangentspace_dmu : float
+    Infinitesimal of parameter :math:`d\mu` for calculating :math:`dx/d\mu`
+"""
 
 
 def concat(x, mu):
@@ -38,6 +42,7 @@ def tangent_vector(func, x, mu, tangent_dmu=1e-7, dxi=None, **opt):
     --------
     dxi : np.array
         Tangent vector
+
     """
     logger = Logger(__name__, "TangentVector")
     dmu = tangent_dmu
@@ -77,7 +82,9 @@ def continuation(func, x, mu, delta, **opt):
     Yields
     -------
     x : numpy.array
+        :math:`x`
     mu : float
+        :math:`\mu`
 
     """
     logger = Logger(__name__, "Continuation")

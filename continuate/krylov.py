@@ -8,14 +8,6 @@ These methods are based on the Arnoldi process
 where :math:`V_n` denotes the basis of Krylov subspace,
 and :math:`H_n` denotes the projected matrix with Hessenberg form.
 
-Options
---------
-krylov_tol : float
-    Tolerrance of Krylov iteration
-krylov_maxiter : float
-    Max iteration number of Krylov iteration
-
-Their default values are set in :py:data:`.default_options`
 """
 
 import numpy as np
@@ -30,6 +22,13 @@ default_options = {
 """ default values of options
 
 You can get these values through :py:func:`continuate.get_default_options`
+
+Parameters
+-----------
+krylov_tol : float
+    Tolerrance of Krylov iteration
+krylov_maxiter : float
+    Max iteration number of Krylov iteration
 """
 
 
