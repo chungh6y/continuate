@@ -2,6 +2,7 @@
 
 import numpy as np
 import types
+from functools import wraps
 from logging import getLogger, DEBUG, LoggerAdapter
 
 
@@ -48,6 +49,7 @@ class ArrayAdapterP(ArrayAdapter):
 
 
 def array_adapter(method):
+    @wraps(method)
     def wrapper(func, x, *args, **kwds):
         f = ArrayAdapter(func, x)
         v = f.convert(x)
@@ -57,6 +59,7 @@ def array_adapter(method):
 
 
 def array_adapter_p(method):
+    @wraps(method)
     def wrapper(func, x, *args, **kwds):
         f = ArrayAdapterP(func, x)
         obj = method(f, f.convert(x), *args, **kwds)

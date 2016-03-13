@@ -9,12 +9,17 @@ Welcome to continuate's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 0
 
+  qr
+  krylov
+  newton
+  arclength
+  misc
 
 
 Indices and tables
-==================
+====================
 
 * :ref:`genindex`
 * :ref:`modindex`
