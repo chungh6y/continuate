@@ -5,6 +5,8 @@ Options
 --------
 newton_tol : float
     Tolerrance of Newton step
+newton_krylov_tol_ratio : float
+    relative tolerrance of Krylov method (GMRES)
 newton_maxiter : int
     Max iteration number of Newton method
 jacobi_alpha : float
@@ -28,6 +30,7 @@ from . import krylov
 
 default_options = {
     "newton_tol": 1e-7,
+    "newton_krylov_tol_ratio": 0.1,
     "newton_maxiter": 100,
     "jacobi_alpha": 1e-7,
     "trusted_region": 1e-1,
@@ -244,7 +247,8 @@ def hook_step(A, b, trusted_region, hook_maxiter, hook_tol, nu=0, **opt):
 
 
 @array_adapter
-def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
+def newton_krylov_hook_gen(func, x0, trusted_region,
+                           newton_krylov_tol_ratio, **opt):
     """ Generator of Newton-Krylov-hook iteration
 
     Yields
@@ -268,7 +272,7 @@ def newton_krylov_hook_gen(func, x0, trusted_region, **opt):
         yield x0, res, fx
         A = Jacobi(func, x0, fx=fx, **opt)
         b = -fx
-        opt["krylov_tol"] = 0.1 * norm(b)
+        opt["krylov_tol"] = newton_krylov_tol_ratio * norm(b)
         V, R, g, Q = krylov.gmres_factorize(A, b, **opt)
         dx = np.dot(V[:, :len(g)], np.linalg.solve(R, g))
         dx_norm = norm(dx)
