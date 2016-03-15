@@ -6,12 +6,21 @@ continuate
 
 Continuation tools.
 
+***CAUTION***: This program is alpha version. Fatal errors may be included.
+
+
 Install
 -------
 Please install from PyPI
 
 ```command
 pip install continuate
+```
+
+or use development install
+
+```command
+python setup.py develop
 ```
 
 Sample
