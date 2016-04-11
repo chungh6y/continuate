@@ -4,7 +4,6 @@ continuate
 [![Build Status](https://travis-ci.org/termoshtt/continuate.svg?branch=master)](https://travis-ci.org/termoshtt/continuate)
 [![PyPI version](https://badge.fury.io/py/continuate.svg)](https://badge.fury.io/py/continuate)
 [![Code Climate](https://codeclimate.com/github/termoshtt/continuate/badges/gpa.svg)](https://codeclimate.com/github/termoshtt/continuate)
-[![Test Coverage](https://codeclimate.com/github/termoshtt/continuate/badges/coverage.svg)](https://codeclimate.com/github/termoshtt/continuate/coverage)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 Continuation tools.
