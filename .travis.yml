@@ -17,4 +17,4 @@ addons:
 virtualenv:
   system_site_packages: true
 
-script: nosetests -v --with-doctest
+script: nosetests -v --with-doctest --with-coverage --cover-package=continuate
