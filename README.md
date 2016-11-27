@@ -5,6 +5,7 @@ continuate
 [![PyPI version](https://badge.fury.io/py/continuate.svg)](https://badge.fury.io/py/continuate)
 [![Code Climate](https://codeclimate.com/github/termoshtt/continuate/badges/gpa.svg)](https://codeclimate.com/github/termoshtt/continuate)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+[![Binder](http://mybinder.org/badge.svg)](http://mybinder.org:/repo/termoshtt/continuate)
 
 Continuation tools.
 
